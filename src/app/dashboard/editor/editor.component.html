@@ -1,88 +1,17 @@
 <div class="flex flex-col md:flex-row h-screen">
-  <!-- Overlay for Mobile -->
-  <div
-    id="overlay"
-    class="fixed inset-0 bg-black opacity-50 z-20"
-    [class.hidden]="!isSidebarActive"
-    (click)="isSidebarActive = false"
-  ></div>
 
-  <!-- Side Panel Expanded View -->
-  <aside
-    [style.width]="sidebarWidth"
-    class="fixed md:relative w-64 h-full bg-gray-800 text-white transform transition-transform duration-300 ease-in-out z-30"
-    [class.w-16]="isPanelCollapsed"
-    [class.-translate-x-full]="!isSidebarActive"
-    [class.md:translate-x-0]="true"
-  >
-    <!-- Header -->
-    <header
-      class="flex justify-between items-center p-4 border-b border-gray-700"
-    >
-      <h3
-        class="text-sm font-semibold truncate transition-opacity duration-300"
-        [class.opacity-0]="isPanelCollapsed"
-      >
-        Project Explorer
-      </h3>
-      <button
-        class="p-1 text-gray-400 hover:text-white rounded focus:outline-none transition-transform duration-300"
-        (click)="togglePanel()"
-      >
-        <i
-          class="bi"
-          [class.bi-chevron-left]="!isPanelCollapsed"
-          [class.bi-chevron-right]="isPanelCollapsed"
-        ></i>
-      </button>
-    </header>
-    <!-- Navigation -->
-    <nav class="p-4">
-      <ul class="space-y-2">
-        <li
-          *ngFor="
-            let item of [
-              { icon: 'bi-house-door', text: 'Home' },
-              { icon: 'bi-graph-up', text: 'Analytics' },
-              { icon: 'bi-gear', text: 'Settings' },
-              { icon: 'bi-person', text: 'Profile' }
-            ]
-          "
-        >
-          <a
-            href="#"
-            class="flex items-center gap-3 p-2 rounded hover:bg-gray-700 transition-colors"
-          >
-            <i class="bi {{ item.icon }} text-lg"></i>
-            <span
-              class="transition-opacity duration-300"
-              [class.opacity-0]="isPanelCollapsed"
-              [class.hidden]="isPanelCollapsed"
-            >
-              {{ item.text }}
-            </span>
-          </a>
-        </li>
-      </ul>
-    </nav>
-  </aside>
-
+  <app-side-panel [isSidebarActive]="isSidebarActive"></app-side-panel>
   <!-- Main Content -->
   <div class="flex-1 flex flex-col">
     <!-- Header -->
     <header
-      class="h-16 bg-gradient-to-r from-gray-800 to-gray-900 text-white shadow flex items-center justify-between px-4 md:px-6"
-    >
-      <button
-        class="text-gray-400 hover:text-white md:hidden"
-        (click)="toggleSidebar()"
-      >
+      class="h-16 bg-gradient-to-r from-gray-800 to-gray-900 text-white shadow flex items-center justify-between px-4 md:px-6">
+      <button class="text-gray-400 hover:text-white md:hidden" (click)="toggleSidebar()">
         <i class="bi bi-list text-2xl"></i>
       </button>
       <h2 class="text-lg font-semibold">Start Building</h2>
       <button
-        class="px-4 py-2 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-md shadow hover:from-green-600 hover:to-teal-700"
-      >
+        class="px-4 py-2 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-md shadow hover:from-green-600 hover:to-teal-700">
         <i class="bi bi-download mr-1"></i> Save Project
       </button>
     </header>
@@ -90,62 +19,41 @@
     <!-- Main Body -->
     <main class="flex-1 p-4 md:p-6 space-y-6">
       <!-- Prompt Section -->
-      <section
-        class="bg-gray-900 border border-gray-700 rounded-lg p-4 shadow-lg"
-      >
+      <section class="bg-gray-900 border border-gray-700 rounded-lg p-4 shadow-lg">
         <h3 class="text-white font-semibold mb-3">Enter Prompt</h3>
         <div class="flex flex-col md:flex-row gap-4">
-          <input
-            [(ngModel)]="prompt"
-            type="text"
+          <input [(ngModel)]="prompt" type="text"
             class="flex-grow p-2 bg-gray-800 text-white border border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            placeholder="Describe your website requirements..."
-          />
-          <button
-            (click)="generateDesign()"
-            class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-sm font-medium rounded-md shadow hover:from-purple-600 hover:to-pink-700 transition"
-          >
+            placeholder="Describe your website requirements..." />
+          <button (click)="generateDesign()"
+            class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-sm font-medium rounded-md shadow hover:from-purple-600 hover:to-pink-700 transition">
             <i class="bi bi-lightbulb-fill mr-1"></i> Generate
           </button>
         </div>
       </section>
 
       <!-- Live Preview Section -->
-      <section
-        class="preview-container flex flex-col h-full bg-gray-800 border border-gray-700 rounded-lg shadow-lg"
-      >
-        <header
-          class="preview-header bg-gray-900 border-b border-gray-700 px-4 py-2 flex items-center justify-between"
-        >
+      <section class="preview-container flex flex-col h-full bg-gray-800 border border-gray-700 rounded-lg shadow-lg">
+        <header class="preview-header bg-gray-900 border-b border-gray-700 px-4 py-2 flex items-center justify-between">
           <h3 class="text-white font-semibold">Design Preview</h3>
           <div class="flex space-x-2">
-            <button
-              class="px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600"
-              (click)="toggleView('desktop')"
-            >
+            <button class="px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600"
+              (click)="toggleView('desktop')">
               Desktop
             </button>
-            <button
-              class="px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600"
-              (click)="toggleView('tablet')"
-            >
+            <button class="px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600"
+              (click)="toggleView('tablet')">
               Tablet
             </button>
-            <button
-              class="px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600"
-              (click)="toggleView('mobile')"
-            >
+            <button class="px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600"
+              (click)="toggleView('mobile')">
               Mobile
             </button>
           </div>
         </header>
         <div id="livePreview" class="flex-1 overflow-hidden">
-          <iframe
-            id="liveFrame"
-            sandbox="allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts"
-            frameborder="1"
-            class="w-full h-full"
-          ></iframe>
+          <iframe id="liveFrame" sandbox="allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts"
+            frameborder="1" class="w-full h-full"></iframe>
         </div>
       </section>
     </main>

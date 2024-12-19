@@ -1,0 +1,40 @@
+<!-- Overlay for Mobile -->
+<div id="overlay" class="fixed inset-0 bg-black opacity-50 z-20" [class.hidden]="!isSidebarActive"
+    (click)="isSidebarActive = false"></div>
+
+<!-- Side Panel Expanded View -->
+<aside [style.width]="sidebarWidth"
+    class="fixed md:relative w-64 h-full bg-gray-800 text-white transform transition-transform duration-300 ease-in-out z-30"
+    [class.w-16]="isPanelCollapsed" [class.-translate-x-full]="!isSidebarActive" [class.md:translate-x-0]="true">
+    <!-- Header -->
+    <header class="flex justify-between items-center p-4 border-b border-gray-700">
+        <h3 class="text-sm font-semibold truncate transition-opacity duration-300" [class.opacity-0]="isPanelCollapsed">
+            Project Explorer
+        </h3>
+        <button class="p-1 text-gray-400 hover:text-white rounded focus:outline-none transition-transform duration-300"
+            (click)="togglePanel()">
+            <i class="bi" [class.bi-chevron-left]="!isPanelCollapsed" [class.bi-chevron-right]="isPanelCollapsed"></i>
+        </button>
+    </header>
+    <!-- Navigation -->
+    <nav class="p-4">
+        <ul class="space-y-2">
+            <li *ngFor="
+          let item of [
+            { icon: 'bi-house-door', text: 'Home' },
+            { icon: 'bi-graph-up', text: 'Analytics' },
+            { icon: 'bi-gear', text: 'Settings' },
+            { icon: 'bi-person', text: 'Profile' }
+          ]
+        ">
+                <a href="#" class="flex items-center gap-3 p-2 rounded hover:bg-gray-700 transition-colors">
+                    <i class="bi {{ item.icon }} text-lg"></i>
+                    <span class="transition-opacity duration-300" [class.opacity-0]="isPanelCollapsed"
+                        [class.hidden]="isPanelCollapsed">
+                        {{ item.text }}
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</aside>

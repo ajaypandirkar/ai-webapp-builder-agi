@@ -1,22 +1,20 @@
 import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-editor',
   templateUrl: './editor.component.html',
   styleUrl: './editor.component.css'
 })
-export class EditorComponent {
+export class EditorComponent implements OnInit{
   isCollapsed = false; // Toggle state for the side panel
-  isSidebarActive: boolean = false;
+  isSidebarActive: boolean | undefined;
   prompt = ''; // Input prompt for design generation
   generatedDesign: string | null = null; // Holds the generated HTML design
   isLoading = false; // Indicates if design generation is in progress
   errorMessage: string | null = null; // Error message if any
 
-  sidebarWidth = '16rem'; // 256px = 16rem
 
-  isPanelCollapsed = false;
   private resizeListener: () => void;
 
   constructor() {
@@ -42,10 +40,6 @@ export class EditorComponent {
     this.isSidebarActive = false;
   }
 
-  togglePanel() {
-    this.isPanelCollapsed = !this.isPanelCollapsed;
-    this.sidebarWidth = this.isPanelCollapsed ? '4rem' : '16rem'; // 64px = 4rem
-  }
 
   private handleResize() {
     if (window.innerWidth >= 768) { // md breakpoint

@@ -1,43 +1,45 @@
 <!-- Hero Section -->
-<header class="gradient-bg flex items-center">
-    <div class="container mx-auto px-4 py-16">
+<header class="gradient-bg min-h-screen">
+    <div class="container mx-auto px-4">
         <!-- Navigation -->
-        <nav class="flex justify-between items-center mb-8 md:mb-16">
-            <div class="text-3xl font-bold flex items-center">
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
-                    AI
-                </span>
-                <span class="text-blue-500 neon-effect">Developer</span>
+        <nav class="py-4 sm:py-6">
+            <div class="flex justify-between items-center">
+                <div class="text-2xl sm:text-3xl font-bold flex items-center">
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
+                        AI
+                    </span>
+                    <span class="text-blue-500 neon-effect">Developer</span>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#features" class="text-sm hover:text-blue-500 hover:underline">Features</a>
+                    <a href="#how-to" class="text-sm hover:text-blue-500 hover:underline">How to Use</a>
+                    <a href="#testimonials" class="text-sm hover:text-blue-500 hover:underline">Testimonials</a>
+                </div>
+                <button class="hidden md:block bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 px-4 sm:px-6 py-2 rounded-full text-sm transition duration-300 shadow-lg hover:shadow-xl">
+                    Contact Us
+                </button>
+                <!-- Mobile Menu Button -->
+                <button class="block md:hidden text-white text-xl focus:outline-none">
+                    <i class="bi bi-list"></i>
+                </button>
             </div>
-            <div class="hidden md:flex space-x-6">
-                <a href="#features" class="hover:text-blue-500 hover:underline">Features</a>
-                <a href="#how-to" class="hover:text-blue-500 hover:underline">How to Use</a>
-                <a href="#testimonials" class="hover:text-blue-500 hover:underline">Testimonials</a>
-            </div>
-            <button class="hidden md:block bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 px-6 py-2 rounded-full transition duration-300 shadow-lg hover:shadow-xl">
-                Contact Us
-            </button>
-            <!-- Mobile Menu Button -->
-            <button class="block md:hidden text-white text-2xl focus:outline-none">
-                <i class="bi bi-list"></i>
-            </button>
         </nav>
 
         <!-- Hero Content -->
-        <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div class="grid md:grid-cols-2 gap-8 sm:gap-12 items-center pt-8 sm:pt-16 md:pt-24">
             <div>
-                <h2 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-center md:text-left">Create Websites Effortlessly with AI</h2>
-                <p class="text-lg sm:text-xl mb-8 text-gray-300 text-center md:text-left">Experience the next level of web development. Generate complete web projects using natural language prompts and advanced AI.</p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                    <button (click)="navigateToEditor()" class="bg-blue-500 hover:bg-blue-600 px-6 sm:px-8 py-3 rounded-full text-lg font-semibold transition duration-300">
+                <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-center md:text-left">Create Websites Effortlessly with AI</h2>
+                <p class="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 text-gray-300 text-center md:text-left">Experience the next level of web development. Generate complete web projects using natural language prompts and advanced AI.</p>
+                <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
+                    <button (click)="navigateToEditor()" class="bg-blue-500 hover:bg-blue-600 px-4 sm:px-6 md:px-8 py-2 sm:py-3 rounded-full text-base sm:text-lg font-semibold transition duration-300">
                         Get Started
                     </button>
-                    <button class="border border-white px-6 sm:px-8 py-3 rounded-full text-lg font-semibold hover:bg-white hover:text-gray-900 transition duration-300">
+                    <button class="border border-white px-4 sm:px-6 md:px-8 py-2 sm:py-3 rounded-full text-base sm:text-lg font-semibold hover:bg-white hover:text-gray-900 transition duration-300">
                         Watch Demo
                     </button>
                 </div>
             </div>
-            <div class="relative">
+            <div class="relative mt-8 sm:mt-0">
                 <div class="aspect-w-16 aspect-h-9">
                     <video class="rounded-lg shadow-2xl" poster="https://images.unsplash.com/photo-1677442136019-21780ecad995" controls>
                         <source src="#" type="video/mp4">
@@ -50,87 +52,87 @@
 </header>
 
 <!-- How to Use Section -->
-<section class="py-16 sm:py-20 bg-gray-800">
+<section class="py-12 sm:py-16 md:py-20 bg-gray-800">
     <div class="container mx-auto px-4">
-        <h2 class="text-3xl sm:text-4xl font-bold text-center mb-12 sm:mb-16">How to Use AI Developer</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-            <div class="p-6 rounded-xl card-hover text-center">
-                <div class="text-5xl mb-4 text-blue-500"><i class="bi bi-1-circle"></i></div>
-                <h3 class="text-2xl font-bold mb-4">Sign Up</h3>
-                <p class="text-gray-400">Create your account and start building with cutting-edge AI tools.</p>
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12 md:mb-16">How to Use AI Developer</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
+            <div class="p-4 sm:p-6 rounded-xl card-hover text-center">
+                <div class="text-4xl sm:text-5xl mb-3 sm:mb-4 text-blue-500"><i class="bi bi-1-circle"></i></div>
+                <h3 class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Sign Up</h3>
+                <p class="text-sm sm:text-base text-gray-400">Create your account and start building with cutting-edge AI tools.</p>
             </div>
-            <div class="p-6 rounded-xl card-hover text-center">
-                <div class="text-5xl mb-4 text-blue-500"><i class="bi bi-2-circle"></i></div>
-                <h3 class="text-2xl font-bold mb-4">Enter Your Prompt</h3>
-                <p class="text-gray-400">Describe your project, and our AI will generate a complete web solution tailored to your needs.</p>
+            <div class="p-4 sm:p-6 rounded-xl card-hover text-center">
+                <div class="text-4xl sm:text-5xl mb-3 sm:mb-4 text-blue-500"><i class="bi bi-2-circle"></i></div>
+                <h3 class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Enter Your Prompt</h3>
+                <p class="text-sm sm:text-base text-gray-400">Describe your project, and our AI will generate a complete web solution tailored to your needs.</p>
             </div>
-            <div class="p-6 rounded-xl card-hover text-center">
-                <div class="text-5xl mb-4 text-blue-500"><i class="bi bi-3-circle"></i></div>
-                <h3 class="text-2xl font-bold mb-4">Customize and Deploy</h3>
-                <p class="text-gray-400">Refine the generated results and deploy them seamlessly to your preferred platform.</p>
+            <div class="p-4 sm:p-6 rounded-xl card-hover text-center">
+                <div class="text-4xl sm:text-5xl mb-3 sm:mb-4 text-blue-500"><i class="bi bi-3-circle"></i></div>
+                <h3 class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Customize and Deploy</h3>
+                <p class="text-sm sm:text-base text-gray-400">Refine the generated results and deploy them seamlessly to your preferred platform.</p>
             </div>
         </div>
     </div>
 </section>
 
 <!-- Testimonials Section -->
-<section class="py-16 sm:py-20 bg-gray-900">
+<section class="py-12 sm:py-16 md:py-20 bg-gray-900">
     <div class="container mx-auto px-4">
-        <h2 class="text-3xl sm:text-4xl font-bold text-center mb-12 sm:mb-16">What Our Users Say</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-            <div class="testimonial-card p-6 rounded-xl">
-                <div class="flex items-center mb-4">
-                    <div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center mr-4">
-                        <i class="bi bi-person text-2xl"></i>
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12 md:mb-16">What Our Users Say</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
+            <div class="testimonial-card p-4 sm:p-6 rounded-xl">
+                <div class="flex items-center mb-3 sm:mb-4">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-500 flex items-center justify-center mr-3 sm:mr-4">
+                        <i class="bi bi-person text-xl sm:text-2xl"></i>
                     </div>
                     <div>
-                        <h4 class="font-bold">Alex Turner</h4>
-                        <p class="text-gray-400">Freelance Developer</p>
+                        <h4 class="font-bold text-base sm:text-lg">Alex Turner</h4>
+                        <p class="text-sm sm:text-base text-gray-400">Freelance Developer</p>
                     </div>
                 </div>
-                <p class="text-gray-300">"AI Developer has revolutionized the way I create web projects. It's incredibly intuitive and efficient!"</p>
+                <p class="text-sm sm:text-base text-gray-300">"AI Developer has revolutionized the way I create web projects. It's incredibly intuitive and efficient!"</p>
             </div>
-            <div class="testimonial-card p-6 rounded-xl">
-                <div class="flex items-center mb-4">
-                    <div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center mr-4">
-                        <i class="bi bi-person text-2xl"></i>
+            <div class="testimonial-card p-4 sm:p-6 rounded-xl">
+                <div class="flex items-center mb-3 sm:mb-4">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-500 flex items-center justify-center mr-3 sm:mr-4">
+                        <i class="bi bi-person text-xl sm:text-2xl"></i>
                     </div>
                     <div>
-                        <h4 class="font-bold">Samantha Lee</h4>
-                        <p class="text-gray-400">Startup Founder</p>
+                        <h4 class="font-bold text-base sm:text-lg">Samantha Lee</h4>
+                        <p class="text-sm sm:text-base text-gray-400">Startup Founder</p>
                     </div>
                 </div>
-                <p class="text-gray-300">"Thanks to AI Developer, I can prototype my ideas faster than ever before. Truly a game-changer!"</p>
+                <p class="text-sm sm:text-base text-gray-300">"Thanks to AI Developer, I can prototype my ideas faster than ever before. Truly a game-changer!"</p>
             </div>
-            <div class="testimonial-card p-6 rounded-xl">
-                <div class="flex items-center mb-4">
-                    <div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center mr-4">
-                        <i class="bi bi-person text-2xl"></i>
+            <div class="testimonial-card p-4 sm:p-6 rounded-xl">
+                <div class="flex items-center mb-3 sm:mb-4">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-500 flex items-center justify-center mr-3 sm:mr-4">
+                        <i class="bi bi-person text-xl sm:text-2xl"></i>
                     </div>
                     <div>
-                        <h4 class="font-bold">Mark Wilson</h4>
-                        <p class="text-gray-400">CTO, TechNext</p>
+                        <h4 class="font-bold text-base sm:text-lg">Mark Wilson</h4>
+                        <p class="text-sm sm:text-base text-gray-400">CTO, TechNext</p>
                     </div>
                 </div>
-                <p class="text-gray-300">"This platform has streamlined our development process, saving us time and resources."</p>
+                <p class="text-sm sm:text-base text-gray-300">"This platform has streamlined our development process, saving us time and resources."</p>
             </div>
         </div>
     </div>
 </section>
 
 <!-- CTA Section -->
-<section class="py-16 sm:py-20 gradient-bg">
+<section class="py-12 sm:py-16 md:py-20 gradient-bg">
     <div class="container mx-auto px-4 text-center">
-        <h2 class="text-3xl sm:text-4xl font-bold mb-8">Ready to Build Smarter?</h2>
-        <p class="text-lg sm:text-xl mb-8 max-w-2xl mx-auto text-gray-300">Join thousands of developers who are transforming web development with AI Developer.</p>
-        <button (click)="navigateToEditor()" class="bg-white text-gray-900 hover:bg-gray-100 px-6 sm:px-8 py-3 rounded-full text-lg font-semibold transition duration-300">
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 sm:mb-8">Ready to Build Smarter?</h2>
+        <p class="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 max-w-2xl mx-auto text-gray-300">Join thousands of developers who are transforming web development with AI Developer.</p>
+        <button (click)="navigateToEditor()" class="bg-white text-gray-900 hover:bg-gray-100 px-4 sm:px-6 md:px-8 py-2 sm:py-3 rounded-full text-base sm:text-lg font-semibold transition duration-300">
             Get Started Now
         </button>
     </div>
 </section>
 
-<footer class="bg-gray-800 py-6 sm:py-8">
+<footer class="bg-gray-800 py-4 sm:py-6 md:py-8">
     <div class="container mx-auto px-4 text-center text-gray-400">
-        <p>&copy; 2024 AI Developer. All rights reserved.</p>
+        <p class="text-sm sm:text-base">&copy; 2024 AI Developer. All rights reserved.</p>
     </div>
 </footer>
