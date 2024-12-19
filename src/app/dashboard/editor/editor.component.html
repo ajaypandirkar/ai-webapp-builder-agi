@@ -1,0 +1,107 @@
+<div class="flex h-screen">
+    <!-- Side Panel Toggle Button (Visible Only on Mobile) -->
+    <button
+      class="md:hidden p-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white focus:outline-none z-30 rounded-md shadow-lg hover:from-blue-600 hover:to-purple-700"
+      (click)="togglePanel()"
+    >
+      <i
+        class="bi"
+        [ngClass]="{ 'bi-list': !isCollapsed, 'bi-x': isCollapsed }"
+      ></i>
+    </button>
+
+    <!-- Side Panel -->
+    <aside
+      class="left-panel bg-gray-800 text-white border-r border-gray-700"
+      [class.collapsed]="isCollapsed"
+      style="min-width: 250px; max-width: 400px;"
+    >
+      <header
+        class="flex justify-between items-center p-4 border-b border-gray-700"
+      >
+        <h3 *ngIf="!isCollapsed" class="text-sm font-semibold">
+          Project Explorer
+        </h3>
+        <button
+          class="p-1 text-gray-400 hover:text-white rounded focus:outline-none"
+          (click)="togglePanel()"
+        >
+          <i
+            class="bi"
+            [ngClass]="{
+              'bi-chevron-left': !isCollapsed,
+              'bi-chevron-right': isCollapsed
+            }"
+          ></i>
+        </button>
+      </header>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content flex-1 flex flex-col">
+      <!-- Header -->
+      <header
+        class="h-16 bg-gradient-to-r from-gray-800 to-gray-900 text-white shadow flex items-center justify-between px-6"
+      >
+        <h2 class="text-lg font-semibold">Start Building</h2>
+        <button
+          class="px-4 py-2 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-md shadow hover:from-green-600 hover:to-teal-700"
+        >
+          <i class="bi bi-download mr-1"></i> Save Project
+        </button>
+      </header>
+
+      <!-- Main Body -->
+      <main class="flex-1 p-6 space-y-6">
+        <!-- Prompt Section -->
+        <section
+          class="bg-gray-900 border border-gray-700 rounded-lg p-4 shadow-lg"
+        >
+          <h3 class="text-white font-semibold mb-3">Enter Prompt</h3>
+          <div class="flex flex-col md:flex-row gap-4">
+            <input
+              [(ngModel)]="prompt"
+              type="text"
+              class="flex-grow p-2 bg-gray-800 text-white border border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="Describe your website requirements..."
+            />
+            <button
+              (click)="generateDesign()"
+              class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-sm font-medium rounded-md shadow hover:from-purple-600 hover:to-pink-700 transition"
+            >
+              <i class="bi bi-lightbulb-fill mr-1"></i> Generate
+            </button>
+          </div>
+        </section>
+
+        <!-- Live Preview Section -->
+        <section class="preview-container flex flex-col h-full bg-gray-800 border border-gray-700 rounded-lg shadow-lg">
+          <header class="preview-header bg-gray-900 border-b border-gray-700 px-4 py-2 flex items-center justify-between">
+            <h3 class="text-white font-semibold">Design Preview</h3>
+            <div class="flex space-x-2">
+              <button class="px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600" (click)="refreshPreview()">
+                Refresh
+              </button>
+              <button class="px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600" (click)="toggleView('desktop')">
+                Desktop
+              </button>
+              <button class="px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600" (click)="toggleView('tablet')">
+                Tablet
+              </button>
+              <button class="px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600" (click)="toggleView('mobile')">
+                Mobile
+              </button>
+            </div>
+          </header>
+          <div id="livePreview" class="flex-1 overflow-hidden">
+            <iframe
+              id="liveFrame"
+              sandbox="allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts"
+              frameborder="1"
+              class="w-full h-full"
+            ></iframe>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
