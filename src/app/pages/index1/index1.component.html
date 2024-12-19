@@ -1,0 +1,125 @@
+<!-- Hero Section -->
+<header class="gradient-bg min-h-screen flex items-center">
+    <div class="container mx-auto px-4 py-16">
+        <nav class="flex justify-between items-center mb-16">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="text-3xl font-bold flex items-center">
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
+                        AI
+                    </span>
+                    <span class="text-blue-500 neon-effect">Developer</span>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#features" class="hover:text-blue-500 hover:underline">Features</a>
+                    <a href="#how-to" class="hover:text-blue-500 hover:underline">How to Use</a>
+                    <a href="#testimonials" class="hover:text-blue-500 hover:underline">Testimonials</a>
+                </div>
+                <button class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 px-6 py-2 rounded-full transition duration-300 shadow-lg hover:shadow-xl">
+                    Contact Us
+                </button>
+            </div>
+        </nav>
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+                <h2 class="text-5xl md:text-6xl font-bold mb-6">Create Websites Effortlessly with AI</h2>
+                <p class="text-xl mb-8 text-gray-300">Experience the next level of web development. Generate complete web projects using natural language prompts and advanced AI.</p>
+                <div class="flex gap-4 flex-wrap">
+                    <button (click)="navigateToEditor()" class="bg-blue-500 hover:bg-blue-600 px-8 py-3 rounded-full text-lg font-semibold transition duration-300">Get Started</button>
+                    <button class="border border-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-white hover:text-gray-900 transition duration-300">Watch Demo</button>
+                </div>
+            </div>
+            <div class="relative">
+                <div class="aspect-w-16 aspect-h-9">
+                    <video class="rounded-lg shadow-2xl" poster="https://images.unsplash.com/photo-1677442136019-21780ecad995" controls>
+                        <source src="#" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- How to Use Section -->
+<section class="py-20 bg-gray-800">
+    <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center mb-16">How to Use AI Developer</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="p-6 rounded-xl card-hover">
+                <div class="text-5xl mb-4 text-blue-500"><i class="bi bi-1-circle"></i></div>
+                <h3 class="text-2xl font-bold mb-4">Sign Up</h3>
+                <p class="text-gray-400">Create your account and start building with cutting-edge AI tools.</p>
+            </div>
+            <div class="p-6 rounded-xl card-hover">
+                <div class="text-5xl mb-4 text-blue-500"><i class="bi bi-2-circle"></i></div>
+                <h3 class="text-2xl font-bold mb-4">Enter Your Prompt</h3>
+                <p class="text-gray-400">Describe your project, and our AI will generate a complete web solution tailored to your needs.</p>
+            </div>
+            <div class="p-6 rounded-xl card-hover">
+                <div class="text-5xl mb-4 text-blue-500"><i class="bi bi-3-circle"></i></div>
+                <h3 class="text-2xl font-bold mb-4">Customize and Deploy</h3>
+                <p class="text-gray-400">Refine the generated results and deploy them seamlessly to your preferred platform.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-20 bg-gray-900">
+    <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center mb-16">What Our Users Say</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="testimonial-card p-6 rounded-xl">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center mr-4">
+                        <i class="bi bi-person text-2xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold">Alex Turner</h4>
+                        <p class="text-gray-400">Freelance Developer</p>
+                    </div>
+                </div>
+                <p class="text-gray-300">"AI Developer has revolutionized the way I create web projects. It's incredibly intuitive and efficient!"</p>
+            </div>
+            <div class="testimonial-card p-6 rounded-xl">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center mr-4">
+                        <i class="bi bi-person text-2xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold">Samantha Lee</h4>
+                        <p class="text-gray-400">Startup Founder</p>
+                    </div>
+                </div>
+                <p class="text-gray-300">"Thanks to AI Developer, I can prototype my ideas faster than ever before. Truly a game-changer!"</p>
+            </div>
+            <div class="testimonial-card p-6 rounded-xl">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center mr-4">
+                        <i class="bi bi-person text-2xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold">Mark Wilson</h4>
+                        <p class="text-gray-400">CTO, TechNext</p>
+                    </div>
+                </div>
+                <p class="text-gray-300">"This platform has streamlined our development process, saving us time and resources."</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20 gradient-bg">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-4xl font-bold mb-8">Ready to Build Smarter?</h2>
+        <p class="text-xl mb-8 max-w-2xl mx-auto text-gray-300">Join thousands of developers who are transforming web development with AI Developer.</p>
+        <button (click)="navigateToEditor()" class="bg-white text-gray-900 hover:bg-gray-100 px-8 py-3 rounded-full text-lg font-semibold transition duration-300">Get Started Now</button>
+    </div>
+</section>
+
+<footer class="bg-gray-800 py-8">
+    <div class="container mx-auto px-4 text-center text-gray-400">
+        <p>&copy; 2024 AI Developer. All rights reserved.</p>
+    </div>
+</footer>

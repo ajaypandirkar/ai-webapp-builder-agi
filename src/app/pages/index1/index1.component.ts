@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-index1',
@@ -6,5 +7,10 @@ import { Component } from '@angular/core';
   styleUrl: './index1.component.css'
 })
 export class Index1Component {
-
+  constructor(private router: Router) {
+    
+  }
+  navigateToEditor() {
+    this.router.navigate(['/editor']);
+  }
 }
