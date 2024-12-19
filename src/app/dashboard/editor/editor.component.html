@@ -1,5 +1,5 @@
+<!-- Main Content Area -->
 <div class="flex flex-col md:flex-row h-screen">
-
   <app-side-panel [isSidebarActive]="isSidebarActive"></app-side-panel>
   <!-- Main Content -->
   <div class="flex-1 flex flex-col">
@@ -17,7 +17,7 @@
     </header>
 
     <!-- Main Body -->
-    <main class="flex-1 p-4 md:p-6 space-y-6">
+    <main class="flex-1 p-4 md:p-6 space-y-6 overflow-hidden">
       <!-- Prompt Section -->
       <section class="bg-gray-900 border border-gray-700 rounded-lg p-4 shadow-lg">
         <h3 class="text-white font-semibold mb-3">Enter Prompt</h3>
@@ -33,27 +33,98 @@
       </section>
 
       <!-- Live Preview Section -->
-      <section class="preview-container flex flex-col h-full bg-gray-800 border border-gray-700 rounded-lg shadow-lg">
-        <header class="preview-header bg-gray-900 border-b border-gray-700 px-4 py-2 flex items-center justify-between">
+      <section class="preview-container bg-gray-900">
+        <header
+          class="bg-gray-900 border-b border-gray-700 px-4 py-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <h3 class="text-white font-semibold">Design Preview</h3>
-          <div class="flex space-x-2">
-            <button class="px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600"
-              (click)="toggleView('desktop')">
-              Desktop
-            </button>
-            <button class="px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600"
-              (click)="toggleView('tablet')">
-              Tablet
-            </button>
-            <button class="px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600"
-              (click)="toggleView('mobile')">
-              Mobile
+          <div class="flex items-center gap-4">
+            <div class="flex space-x-2">
+              <!-- Desktop button - hidden on small screens -->
+              <button [ngClass]="{'bg-blue-600': currentView === 'desktop'}"
+                class="hidden sm:inline-flex px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600 items-center gap-1"
+                (click)="toggleView('desktop')">
+                <i class="bi bi-display"></i>
+                <span class="hidden sm:inline">Desktop</span>
+              </button>
+              
+              <!-- Tablet button - hidden on small screens -->
+              <button [ngClass]="{'bg-blue-600': currentView === 'tablet'}"
+                class="hidden sm:inline-flex px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600 items-center gap-1"
+                (click)="toggleView('tablet')">
+                <i class="bi bi-tablet"></i>
+                <span class="hidden sm:inline">Tablet</span>
+              </button>
+              
+              <!-- Mobile button - always visible -->
+              <button [ngClass]="{'bg-blue-600': currentView === 'mobile'}"
+                class="px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600 flex items-center gap-1"
+                (click)="toggleView('mobile')">
+                <i class="bi bi-phone"></i>
+                <span class="hidden sm:inline">Mobile</span>
+              </button>
+            </div>
+            
+            <button (click)="refreshPreview()"
+              class="px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600">
+              <i class="bi bi-arrow-clockwise"></i>
             </button>
           </div>
         </header>
-        <div id="livePreview" class="flex-1 overflow-hidden">
-          <iframe id="liveFrame" sandbox="allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts"
-            frameborder="1" class="w-full h-full"></iframe>
+
+        <div class="preview-wrapper bg-gray-900">
+          <div class="frames-wrapper">
+            <!-- Desktop Frame -->
+            <div *ngIf="currentView === 'desktop'" class="desktop-frame"
+              [ngStyle]="{'transform': 'scale(' + previewScale + ')'}">
+              <div class="desktop-inner">
+                <div class="desktop-top-bar">
+                  <div class="desktop-buttons">
+                    <div class="desktop-button close"></div>
+                    <div class="desktop-button minimize"></div>
+                    <div class="desktop-button maximize"></div>
+                  </div>
+                </div>
+                <div class="desktop-screen">
+                  <iframe #previewFrame></iframe>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tablet Frame -->
+            <div *ngIf="currentView === 'tablet'" class="tablet-frame"
+              [ngStyle]="{'transform': 'scale(' + previewScale + ')'}">
+              <div class="tablet-button power"></div>
+              <div class="tablet-button volume-up"></div>
+              <div class="tablet-button volume-down"></div>
+
+              <div class="tablet-inner">
+                <div class="tablet-camera"></div>
+                <div class="tablet-screen">
+                  <iframe #previewFrame></iframe>
+                </div>
+                <div class="tablet-home-button"></div>
+              </div>
+            </div>
+
+            <!-- Mobile Frame -->
+            <div *ngIf="currentView === 'mobile'" class="mobile-frame"
+              [ngStyle]="{'transform': 'scale(' + previewScale + ')'}">
+              <div class="mobile-button volume-up"></div>
+              <div class="mobile-button volume-down"></div>
+              <div class="mobile-button power"></div>
+
+              <div class="mobile-inner">
+                <div class="mobile-notch">
+                  <div class="mobile-camera"></div>
+                  <div class="mobile-speaker"></div>
+                </div>
+                <div class="mobile-screen">
+                  <iframe #previewFrame></iframe>
+                </div>
+                <div class="mobile-home-indicator"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </main>

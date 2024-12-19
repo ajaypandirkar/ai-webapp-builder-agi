@@ -10,6 +10,13 @@ export class SidePanelComponent {
   isPanelCollapsed = false;
   sidebarWidth = '16rem'; // 256px = 16rem
 
+  recentPrompts: string[] = [
+    "Create a landing page with hero section",
+    "Build a contact form with validation",
+    "Generate a pricing table component",
+    // Add more recent prompts as needed
+  ];
+  
   togglePanel() {
     this.isPanelCollapsed = !this.isPanelCollapsed;
     this.sidebarWidth = this.isPanelCollapsed ? '4rem' : '16rem'; // 64px = 4rem
