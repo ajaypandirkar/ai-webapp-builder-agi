@@ -59,6 +59,7 @@ export class EditorComponent {
     //   });
 
     this.generatedDesign = this.provideGeneratedDesignExample();
+    this.renderDesign();
   }
 
   renderDesign() {
