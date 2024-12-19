@@ -8,15 +8,49 @@ import { Component } from '@angular/core';
 })
 export class EditorComponent {
   isCollapsed = false; // Toggle state for the side panel
+  isSidebarActive: boolean = false;
   prompt = ''; // Input prompt for design generation
   generatedDesign: string | null = null; // Holds the generated HTML design
   isLoading = false; // Indicates if design generation is in progress
   errorMessage: string | null = null; // Error message if any
 
-  constructor() {}
+  sidebarWidth = '16rem'; // 256px = 16rem
+
+  isPanelCollapsed = false;
+  private resizeListener: () => void;
+
+  constructor() {
+    // Initialize resize listener
+    this.resizeListener = () => this.handleResize();
+  }
+
+  ngOnInit() {
+    // Add window resize listener
+    window.addEventListener('resize', this.resizeListener);
+  }
+
+  ngOnDestroy() {
+    // Clean up resize listener
+    window.removeEventListener('resize', this.resizeListener);
+  }
+
+  toggleSidebar() {
+    this.isSidebarActive = !this.isSidebarActive;
+  }
+
+  handleOverlayClick() {
+    this.isSidebarActive = false;
+  }
 
   togglePanel() {
-    this.isCollapsed = !this.isCollapsed;
+    this.isPanelCollapsed = !this.isPanelCollapsed;
+    this.sidebarWidth = this.isPanelCollapsed ? '4rem' : '16rem'; // 64px = 4rem
+  }
+
+  private handleResize() {
+    if (window.innerWidth >= 768) { // md breakpoint
+      this.isSidebarActive = false; // Reset mobile sidebar state
+    }
   }
 
   generateDesign() {
@@ -58,8 +92,13 @@ export class EditorComponent {
     //     },
     //   });
 
+    this.isLoading = true;
+    this.errorMessage = null;
+
     this.generatedDesign = this.provideGeneratedDesignExample();
     this.renderDesign();
+
+    this.isLoading = false;
   }
 
   renderDesign() {
@@ -78,9 +117,16 @@ export class EditorComponent {
   toggleView(view: 'desktop' | 'tablet' | 'mobile') {
     const iframe = document.getElementById('liveFrame') as HTMLIFrameElement;
     if (iframe) {
-      if (view === 'tablet') iframe.style.width = '768px';
-      else if (view === 'mobile') iframe.style.width = '375px';
-      else iframe.style.width = '100%';
+      switch (view) {
+        case 'tablet':
+          iframe.style.width = '768px';
+          break;
+        case 'mobile':
+          iframe.style.width = '375px';
+          break;
+        default:
+          iframe.style.width = '100%';
+      }
     }
   }
 
