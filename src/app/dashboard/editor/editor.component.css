@@ -7,7 +7,7 @@
 .preview-container {
   display: flex;
   flex-direction: column;
-  height: 90%;
+  height: 85%;
   background-color: rgb(17, 24, 39);
 }
 
@@ -16,8 +16,8 @@
   align-items: center;
   justify-content: center;
   overflow: auto;
-  padding: 2rem;
-  min-height: 80%;
+  padding: 4rem;
+  min-height: 90%;
 }
 
 .frames-wrapper {
