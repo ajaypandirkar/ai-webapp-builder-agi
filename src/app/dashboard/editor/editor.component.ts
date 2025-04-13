@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-editor',
@@ -39,11 +40,19 @@ export class EditorComponent implements OnInit, AfterViewInit {
   private subscriptions: Subscription[] = [];
   private resizeObserver: ResizeObserver;
 
+  // HTML Code Viewer Modal
+  isHtmlModalOpen = false;
+  htmlContent = '';
+  clipboardCopySuccess = false;
+  isHtmlLoading = false;
+  formattedHtml: SafeHtml | null = null;
+
   constructor(
     private authService: AuthService,
     private fileSystemService: FileSystemService,
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private sanitizer: DomSanitizer
   ) {
     this.resizeObserver = new ResizeObserver(() => {
       if (this.currentView !== 'desktop') {
@@ -167,6 +176,128 @@ export class EditorComponent implements OnInit, AfterViewInit {
     this.adjustPreviewScale();
   }
 
+  // View HTML Code in a Modal
+  viewHtmlCode() {
+    if (!this.generatedDesign) {
+      this.errorMessage = 'No HTML content available to view';
+      return;
+    }
+
+    this.isHtmlLoading = true;
+    this.htmlContent = this.generatedDesign;
+    this.isHtmlModalOpen = true;
+
+    // Simulate loading delay for better UX when handling large content
+    setTimeout(() => {
+      this.formattedHtml = this.sanitizer.bypassSecurityTrustHtml(
+        this.formatHtmlContent()
+      );
+      this.isHtmlLoading = false;
+    }, 100);
+  }
+
+  // Copy HTML to clipboard
+  copyHtmlToClipboard() {
+    if (!this.htmlContent) {
+      this.errorMessage = 'No HTML content available to copy';
+      return;
+    }
+
+    navigator.clipboard
+      .writeText(this.htmlContent)
+      .then(() => {
+        this.clipboardCopySuccess = true;
+        // Hide the success message after 2 seconds
+        setTimeout(() => {
+          this.clipboardCopySuccess = false;
+        }, 2000);
+      })
+      .catch((err) => {
+        console.error('Error copying text to clipboard:', err);
+        this.errorMessage = 'Failed to copy to clipboard';
+      });
+  }
+
+  // Format HTML content with basic syntax highlighting
+  formatHtmlContent(): string {
+    if (!this.htmlContent) return '';
+
+    // Escape HTML to prevent XSS
+    let escaped = this.htmlContent
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
+    // Insert word-break opportunities before and after these characters
+    escaped = escaped.replace(/([>,])/g, '$1<wbr>');
+
+    // Basic syntax highlighting with optimized regex
+    let highlighted = escaped
+      // HTML tags
+      .replace(
+        /&lt;(\/?[a-zA-Z][a-zA-Z0-9]*)(.*?)&gt;/g,
+        '<span class="text-orange-400">&lt;$1</span><span class="text-blue-400">$2</span><span class="text-orange-400">&gt;</span>'
+      )
+      // Attributes
+      .replace(
+        /(\s+)([a-zA-Z0-9_-]+)=/g,
+        '$1<span class="text-green-400">$2</span>='
+      )
+      // Attribute values
+      .replace(
+        /=&quot;(.*?)&quot;/g,
+        '=&quot;<span class="text-yellow-300">$1</span>&quot;'
+      )
+      // Comments
+      .replace(
+        /&lt;!--(.*?)--&gt;/g,
+        '<span class="text-gray-500">&lt;!--$1--&gt;</span>'
+      );
+
+    return highlighted;
+  }
+
+  // Open in Full Screen
+  openFullScreen() {
+    if (!this.generatedDesign) {
+      this.errorMessage = 'No content available for full screen view';
+      return;
+    }
+
+    // Create a new window with the content
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      newWindow.document.write(this.generatedDesign);
+      newWindow.document.close();
+    } else {
+      this.errorMessage =
+        'Unable to open full screen view. Please check your popup blocker settings.';
+    }
+  }
+
+  // Download HTML
+  downloadHtml() {
+    if (!this.generatedDesign) {
+      this.errorMessage = 'No HTML content available to download';
+      return;
+    }
+
+    const blob = new Blob([this.generatedDesign], { type: 'text/html' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+
+    a.style.display = 'none';
+    a.href = url;
+    a.download = 'website.html';
+    document.body.appendChild(a);
+    a.click();
+
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  }
+
   ngOnDestroy() {
     // Clean up all subscriptions
     this.subscriptions.forEach((sub) => sub.unsubscribe());
@@ -228,7 +359,11 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
     try {
       console.log('Generating design for prompt:', this.prompt);
-      this.generatedDesign = await this.callGenerationAPI(this.prompt);
+      if (environment.production) {
+        this.generatedDesign = await this.callGenerationAPI(this.prompt);
+      } else {
+        this.generatedDesign = this.provideGeneratedDesignExample();
+      }
       console.log('Design generated successfully');
 
       // Render the design in the preview
@@ -260,6 +395,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
     // Update the payload to match what the API expects
     const payload = {
       prompt: prompt,
+      existingHtml: this.generatedDesign || '',
     };
 
     try {

@@ -15,7 +15,9 @@
       </button>
       <h2 class="text-lg font-semibold">Start Building</h2>
       <button
+        (click)="saveProject()"
         class="px-4 py-2 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-md shadow hover:from-green-600 hover:to-teal-700"
+        [disabled]="!generatedDesign"
       >
         <i class="bi bi-download mr-1"></i> Save Project
       </button>
@@ -120,6 +122,39 @@
               </button>
             </div>
 
+            <!-- Additional Action Buttons -->
+            <div class="flex space-x-2">
+              <!-- View HTML Code button -->
+              <button
+                (click)="viewHtmlCode()"
+                class="px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600 flex items-center gap-1"
+                title="View HTML Code"
+              >
+                <i class="bi bi-code-slash"></i>
+                <span class="hidden sm:inline">HTML</span>
+              </button>
+
+              <!-- Full Screen button -->
+              <button
+                (click)="openFullScreen()"
+                class="px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600 flex items-center gap-1"
+                title="Full Screen Preview"
+              >
+                <i class="bi bi-arrows-fullscreen"></i>
+                <span class="hidden sm:inline">Full</span>
+              </button>
+
+              <!-- Download HTML button -->
+              <button
+                (click)="downloadHtml()"
+                class="px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600 flex items-center gap-1"
+                title="Download HTML"
+              >
+                <i class="bi bi-download"></i>
+                <span class="hidden sm:inline">Export</span>
+              </button>
+            </div>
+
             <button
               (click)="refreshPreview()"
               class="px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600"
@@ -195,5 +230,87 @@
         </div>
       </section>
     </main>
+  </div>
+</div>
+
+<!-- HTML Code Modal -->
+<div
+  *ngIf="isHtmlModalOpen"
+  class="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto"
+>
+  <div
+    class="bg-gray-900 rounded-xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl border border-gray-700"
+    style="min-height: auto; max-height: calc(100vh - 2rem)"
+  >
+    <div
+      class="px-6 py-4 border-b border-gray-700 flex justify-between items-center bg-gray-800 rounded-t-xl sticky top-0 z-10"
+    >
+      <div class="flex items-center">
+        <i class="bi bi-code-slash text-blue-400 mr-2"></i>
+        <h3 class="text-white font-semibold">HTML Code</h3>
+      </div>
+      <button
+        (click)="isHtmlModalOpen = false"
+        class="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700 transition-colors"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    <div class="flex-1 overflow-hidden">
+      <div
+        class="code-container overflow-auto relative bg-gray-850 m-4 rounded-md"
+        style="height: calc(100vh - 250px); max-height: 60vh"
+      >
+        <!-- Loading spinner -->
+        <div
+          *ngIf="isHtmlLoading"
+          class="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-10"
+        >
+          <div
+            class="animate-spin h-10 w-10 border-4 border-blue-500 rounded-full border-t-transparent"
+          ></div>
+        </div>
+
+        <pre
+          class="code-editor p-4 text-gray-300 whitespace-pre font-mono text-sm leading-6 relative"
+        ><code *ngIf="!isHtmlLoading" [innerHTML]="formattedHtml"></code></pre>
+      </div>
+    </div>
+    <div
+      class="px-6 py-4 border-t border-gray-700 flex justify-between bg-gray-800 rounded-b-xl sticky bottom-0 z-10"
+    >
+      <div class="text-xs text-gray-400">
+        <span>{{ htmlContent.split("\n").length }} lines</span>
+        <span class="mx-2">|</span>
+        <span>{{ htmlContent.length }} characters</span>
+      </div>
+      <div class="flex space-x-3">
+        <button
+          (click)="copyHtmlToClipboard()"
+          class="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 flex items-center gap-1 transition-colors"
+        >
+          <i
+            [class]="
+              clipboardCopySuccess
+                ? 'bi bi-check-lg text-green-400'
+                : 'bi bi-clipboard'
+            "
+          ></i>
+          {{ clipboardCopySuccess ? "Copied!" : "Copy" }}
+        </button>
+        <button
+          (click)="downloadHtml()"
+          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-1 transition-colors"
+        >
+          <i class="bi bi-download mr-1"></i> Download
+        </button>
+        <button
+          (click)="isHtmlModalOpen = false"
+          class="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors"
+        >
+          Close
+        </button>
+      </div>
+    </div>
   </div>
 </div>

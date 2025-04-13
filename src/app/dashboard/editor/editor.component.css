@@ -21,10 +21,74 @@
 }
 
 .frames-wrapper {
-    display: flex;
-    flex-direction: column;
-    height: 600px;
-    background-color: rgb(17, 24, 39);
+  display: flex;
+  flex-direction: column;
+  height: 600px;
+  background-color: rgb(17, 24, 39);
+}
+
+/* Code Editor Styles */
+.code-container {
+  position: relative;
+  border: 1px solid rgba(75, 85, 99, 0.5);
+  background-color: rgb(31, 41, 55);
+  -webkit-overflow-scrolling: touch; /* Better scrolling on iOS */
+  box-sizing: border-box;
+}
+
+.code-editor {
+  font-family: "Fira Code", "Source Code Pro", Consolas, "Courier New",
+    monospace;
+  tab-size: 2;
+  counter-reset: line;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(75, 85, 99, 0.5) transparent;
+  line-height: 1.5;
+  letter-spacing: -0.2px;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.code-editor code {
+  display: block;
+  color: #e2e8f0; /* Base color for text */
+}
+
+/* Styling for line numbers if needed in the future */
+.line-number {
+  counter-increment: line;
+  display: inline-block;
+  color: #64748b;
+  text-align: right;
+  width: 40px;
+  margin-right: 16px;
+  padding-right: 8px;
+  border-right: 1px solid #374151;
+  user-select: none;
+}
+
+.line-number::before {
+  content: counter(line);
+}
+
+/* Custom Scrollbar */
+.code-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.code-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.code-container::-webkit-scrollbar-thumb {
+  background-color: rgba(75, 85, 99, 0.5);
+  border-radius: 4px;
+}
+
+.code-container::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(75, 85, 99, 0.8);
 }
 
 /* Desktop Frame */
@@ -69,9 +133,15 @@
   border-radius: 50%;
 }
 
-.desktop-button.close { background: #ff5f57; }
-.desktop-button.minimize { background: #febc2e; }
-.desktop-button.maximize { background: #28c840; }
+.desktop-button.close {
+  background: #ff5f57;
+}
+.desktop-button.minimize {
+  background: #febc2e;
+}
+.desktop-button.maximize {
+  background: #28c840;
+}
 
 .desktop-screen {
   height: calc(100% - 32px);
@@ -282,4 +352,17 @@ iframe {
   height: 100%;
   border: none;
   background: white;
+}
+
+/* Modal specific styles */
+@media (max-height: 700px) {
+  .code-container {
+    max-height: 40vh !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .code-container {
+    margin: 0.5rem !important;
+  }
 }
