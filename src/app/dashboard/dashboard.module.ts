@@ -8,7 +8,7 @@ import { SidePanelComponent } from './side-panel/side-panel.component';
 @NgModule({
   declarations: [
     EditorComponent,
-    SidePanelComponent,
+    SidePanelComponent
   ],
   imports: [
     CommonModule,
