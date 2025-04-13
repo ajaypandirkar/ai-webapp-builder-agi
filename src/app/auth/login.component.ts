@@ -7,6 +7,7 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { AuthService } from './auth.service';
 
 @Component({
@@ -15,21 +16,21 @@ import { AuthService } from './auth.service';
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   template: `
     <div
-      class="min-h-screen bg-gradient-to-br from-indigo-100 via-white to-cyan-100 flex items-center justify-center p-4"
+      class="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 flex items-center justify-center p-4"
     >
       <div
-        class="max-w-md w-full space-y-8 bg-white rounded-2xl shadow-xl p-6 md:p-8"
+        class="max-w-md w-full space-y-8 bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8 border border-gray-700"
       >
         <!-- Header -->
         <div class="text-center">
-          <h2 class="text-3xl font-bold text-gray-900 tracking-tight mb-2">
+          <h2 class="text-3xl font-bold text-white tracking-tight mb-2">
             Welcome back
           </h2>
-          <p class="text-sm text-gray-600">
+          <p class="text-sm text-gray-300">
             New here?
             <a
               routerLink="/signup"
-              class="font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
+              class="font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
             >
               Create an account
             </a>
@@ -44,17 +45,17 @@ import { AuthService } from './auth.service';
           <!-- Error Alert -->
           <div
             *ngIf="error"
-            class="bg-red-50 border-l-4 border-red-400 p-4 rounded-md"
+            class="bg-red-900/30 border-l-4 border-red-500 p-4 rounded-md"
             role="alert"
           >
-            <p class="text-sm text-red-700">{{ error }}</p>
+            <p class="text-sm text-red-300">{{ error }}</p>
           </div>
 
           <!-- Email Field -->
           <div>
             <label
               for="email"
-              class="block text-sm font-medium text-gray-700 mb-1"
+              class="block text-sm font-medium text-gray-300 mb-1"
             >
               Email address
             </label>
@@ -62,16 +63,16 @@ import { AuthService } from './auth.service';
               id="email"
               type="email"
               formControlName="email"
-              class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-xl 
+              class="appearance-none block w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl 
                      shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 
-                     focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-              [class.border-red-300]="isFieldInvalid('email')"
+                     focus:ring-indigo-500 focus:border-indigo-500 transition-all text-white"
+              [class.border-red-500]="isFieldInvalid('email')"
               [class.ring-red-500]="isFieldInvalid('email')"
               placeholder="name@company.com"
             />
             <p
               *ngIf="isFieldInvalid('email')"
-              class="mt-2 text-sm text-red-600"
+              class="mt-2 text-sm text-red-400"
             >
               Please enter a valid email address
             </p>
@@ -81,7 +82,7 @@ import { AuthService } from './auth.service';
           <div>
             <label
               for="password"
-              class="block text-sm font-medium text-gray-700 mb-1"
+              class="block text-sm font-medium text-gray-300 mb-1"
             >
               Password
             </label>
@@ -89,16 +90,16 @@ import { AuthService } from './auth.service';
               id="password"
               type="password"
               formControlName="password"
-              class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-xl 
+              class="appearance-none block w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl 
                      shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 
-                     focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-              [class.border-red-300]="isFieldInvalid('password')"
+                     focus:ring-indigo-500 focus:border-indigo-500 transition-all text-white"
+              [class.border-red-500]="isFieldInvalid('password')"
               [class.ring-red-500]="isFieldInvalid('password')"
               placeholder="••••••••"
             />
             <p
               *ngIf="isFieldInvalid('password')"
-              class="mt-2 text-sm text-red-600"
+              class="mt-2 text-sm text-red-400"
             >
               Password is required
             </p>
@@ -111,11 +112,11 @@ import { AuthService } from './auth.service';
                 id="remember-me"
                 type="checkbox"
                 formControlName="rememberMe"
-                class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                class="h-4 w-4 rounded border-gray-600 bg-gray-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
               />
               <label
                 for="remember-me"
-                class="ml-2 block text-sm text-gray-700 cursor-pointer"
+                class="ml-2 block text-sm text-gray-300 cursor-pointer"
               >
                 Remember me
               </label>
@@ -124,7 +125,7 @@ import { AuthService } from './auth.service';
             <button
               type="button"
               (click)="forgotPassword()"
-              class="text-sm font-medium text-indigo-600 hover:text-indigo-500 
+              class="text-sm font-medium text-indigo-400 hover:text-indigo-300 
            focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 
            rounded-md transition-colors"
             >
@@ -170,10 +171,12 @@ import { AuthService } from './auth.service';
           <!-- Divider -->
           <div class="relative">
             <div class="absolute inset-0 flex items-center">
-              <div class="w-full border-t border-gray-200"></div>
+              <div class="w-full border-t border-gray-600"></div>
             </div>
             <div class="relative flex justify-center text-sm">
-              <span class="px-4 bg-white text-gray-500">Or continue with</span>
+              <span class="px-4 bg-gray-800 text-gray-400"
+                >Or continue with</span
+              >
             </div>
           </div>
 
@@ -182,9 +185,9 @@ import { AuthService } from './auth.service';
             type="button"
             (click)="signInWithGoogle()"
             [disabled]="isLoading"
-            class="w-full flex items-center justify-center px-4 py-3 border border-gray-300 
-                   rounded-xl shadow-sm bg-white hover:bg-gray-50 focus:outline-none 
-                   focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 font-medium 
+            class="w-full flex items-center justify-center px-4 py-3 border border-gray-600 
+                   rounded-xl shadow-sm bg-gray-700 hover:bg-gray-600 focus:outline-none 
+                   focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 font-medium text-white
                    transition-all transform hover:scale-[1.02] active:scale-[0.98] 
                    disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
@@ -235,10 +238,10 @@ export class LoginComponent {
 
       try {
         const { email, password } = this.loginForm.value;
-        await this.authService.signIn(email, password).toPromise();
+        await firstValueFrom(this.authService.signIn(email, password));
 
         const returnUrl =
-          this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+          this.route.snapshot.queryParams['returnUrl'] || '/editor';
 
         await this.router.navigate([returnUrl]);
       } catch (error: any) {
@@ -261,9 +264,9 @@ export class LoginComponent {
     this.error = null;
 
     try {
-      await this.authService.signInWithGoogle().toPromise();
+      await firstValueFrom(this.authService.signInWithGoogle());
       const returnUrl =
-        this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+        this.route.snapshot.queryParams['returnUrl'] || '/editor';
       await this.router.navigate([returnUrl]);
     } catch (error: any) {
       this.error = this.getErrorMessage(error.code);

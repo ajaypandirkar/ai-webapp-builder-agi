@@ -1,5 +1,6 @@
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -13,32 +14,31 @@ import { environment } from '../environments/environment';
 import { ENVIRONMENT } from './config/environment.token';
 
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
+  declarations: [AppComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
+    HttpClientModule,
     AngularFirestoreModule,
-    AngularFireAuthModule
+    AngularFireAuthModule,
   ],
   providers: [
     { provide: ENVIRONMENT, useValue: environment },
-    provideFirebaseApp(() => initializeApp(
-      {
-        "projectId":"ai-developer-dev",
-        "appId":"1:36702166875:web:11a043f8a4487b0c86847e",
-        "storageBucket":"ai-developer-dev.firebasestorage.app",
-        "apiKey":"AIzaSyBVvmqxj3rSNlUs7lseACXs6QKd2WSrVsQ",
-        "authDomain":"ai-developer-dev.firebaseapp.com",
-        "messagingSenderId":"36702166875"
-      }
-    )),
+    provideFirebaseApp(() =>
+      initializeApp({
+        projectId: 'ai-developer-dev',
+        appId: '1:36702166875:web:11a043f8a4487b0c86847e',
+        storageBucket: 'ai-developer-dev.firebasestorage.app',
+        apiKey: 'AIzaSyBVvmqxj3rSNlUs7lseACXs6QKd2WSrVsQ',
+        authDomain: 'ai-developer-dev.firebaseapp.com',
+        messagingSenderId: '36702166875',
+      })
+    ),
     provideAuth(() => getAuth()),
-    provideFirestore(() => getFirestore())
+    provideFirestore(() => getFirestore()),
   ],
   bootstrap: [AppComponent],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class AppModule { }
+export class AppModule {}

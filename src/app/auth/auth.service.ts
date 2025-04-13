@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { 
-  getAuth, 
-  signInWithEmailAndPassword, 
+import {
+  getAuth,
+  signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
@@ -11,16 +11,17 @@ import {
   setPersistence,
   browserLocalPersistence,
   Auth,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
 } from 'firebase/auth';
 import { BehaviorSubject, Observable, from, of, throwError } from 'rxjs';
 import { tap, map, catchError, switchMap } from 'rxjs/operators';
 import { AuthState, UserData } from './user.model';
 import { UserService } from './user.service';
 import { FirebaseInitService } from '../firebase-init.service';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private auth: Auth;
@@ -35,7 +36,9 @@ export class AuthService {
     private userService: UserService
   ) {
     this.auth = getAuth(this.firebaseInit.getApp());
-    this.authStateSubject = new BehaviorSubject<AuthState>(this.getInitialState());
+    this.authStateSubject = new BehaviorSubject<AuthState>(
+      this.getInitialState()
+    );
     this.initializeAuth();
   }
 
@@ -46,36 +49,38 @@ export class AuthService {
 
       await setPersistence(this.auth, browserLocalPersistence);
 
-     // Watch for auth state changes
-     onAuthStateChanged(this.auth, async (user: User | null) => {
-      if (user) {
-        await this.updateAuthState(user);
-        
-        // If we have a user but no stored data, fetch from Firestore
-        if (!localStorage.getItem(this.USER_DATA_KEY)) {
-          const userData = await this.userService.getUserData(user.uid).toPromise();
-          if (userData) {
-            const currentState = this.authStateSubject.value;
-            const newState = {
-              ...currentState,
-              user: {
-                ...currentState.user,
-                ...userData
-              }
-            };
-            this.saveToStorage(newState);
-            this.authStateSubject.next(newState);
+      // Watch for auth state changes
+      onAuthStateChanged(this.auth, async (user: User | null) => {
+        if (user) {
+          await this.updateAuthState(user);
+
+          // If we have a user but no stored data, fetch from Firestore
+          if (!localStorage.getItem(this.USER_DATA_KEY)) {
+            const userData = await firstValueFrom(
+              this.userService.getUserData(user.uid)
+            );
+            if (userData) {
+              const currentState = this.authStateSubject.value;
+              const newState = {
+                ...currentState,
+                user: {
+                  ...currentState.user,
+                  ...userData,
+                },
+              };
+              this.saveToStorage(newState);
+              this.authStateSubject.next(newState);
+            }
+          }
+        } else {
+          // Only clear if we're not in the initialization phase
+          if (this.initialized) {
+            this.clearAuthState();
           }
         }
-      } else {
-        // Only clear if we're not in the initialization phase
-        if (this.initialized) {
-          this.clearAuthState();
-        }
-      }
-    });
+      });
 
-    this.initialized = true;
+      this.initialized = true;
     } catch (error) {
       console.error('Error initializing auth:', error);
       this.initialized = true;
@@ -86,7 +91,7 @@ export class AuthService {
     return {
       user: null,
       token: null,
-      tokenExpiration: null
+      tokenExpiration: null,
     };
   }
 
@@ -97,7 +102,7 @@ export class AuthService {
       phoneNumber: user.phoneNumber,
       displayName: user.displayName,
       photoURL: user.photoURL,
-      emailVerified: user.emailVerified
+      emailVerified: user.emailVerified,
     };
   }
 
@@ -108,17 +113,19 @@ export class AuthService {
       const expirationTime = decodedToken.exp * 1000;
 
       // Get additional user data from Firestore
-      const additionalData = await this.userService.getUserData(user.uid).toPromise();
-      
+      const additionalData = await firstValueFrom(
+        this.userService.getUserData(user.uid)
+      );
+
       const userData = {
         ...this.mapUserToUserData(user),
-        ...additionalData
+        ...additionalData,
       };
 
       const newState: AuthState = {
         user: userData,
         token,
-        tokenExpiration: expirationTime
+        tokenExpiration: expirationTime,
       };
 
       this.saveToStorage(newState);
@@ -131,21 +138,21 @@ export class AuthService {
     }
   }
 
-
   private parseJwt(token: string) {
     try {
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  
-      const buffer = (typeof globalThis !== 'undefined' &&
-        typeof (globalThis as any).Buffer !== 'undefined')
-        ? (globalThis as any).Buffer
-        : null;
-  
+
+      const buffer =
+        typeof globalThis !== 'undefined' &&
+        typeof (globalThis as any).Buffer !== 'undefined'
+          ? (globalThis as any).Buffer
+          : null;
+
       const decoded = buffer
         ? buffer.from(base64, 'base64').toString('utf-8')
         : atob(base64);
-  
+
       return JSON.parse(decoded);
     } catch (error) {
       console.error('Error parsing JWT:', error);
@@ -160,7 +167,10 @@ export class AuthService {
         localStorage.setItem(this.AUTH_TOKEN_KEY, state.token);
       }
       if (state.tokenExpiration) {
-        localStorage.setItem(this.TOKEN_EXPIRY_KEY, state.tokenExpiration.toString());
+        localStorage.setItem(
+          this.TOKEN_EXPIRY_KEY,
+          state.tokenExpiration.toString()
+        );
       }
       if (state.user) {
         localStorage.setItem(this.USER_DATA_KEY, JSON.stringify(state.user));
@@ -183,7 +193,7 @@ export class AuthService {
         const state: AuthState = {
           user: parsedUserData,
           token: token,
-          tokenExpiration: parseInt(expiry)
+          tokenExpiration: parseInt(expiry),
         };
 
         // Only restore if token isn't expired
@@ -210,7 +220,10 @@ export class AuthService {
   }
 
   hasStoredToken(): boolean {
-    return typeof window !== 'undefined' && !!localStorage.getItem(this.AUTH_TOKEN_KEY);
+    return (
+      typeof window !== 'undefined' &&
+      !!localStorage.getItem(this.AUTH_TOKEN_KEY)
+    );
   }
 
   isTokenExpired(): boolean {
@@ -222,7 +235,7 @@ export class AuthService {
   }
 
   get currentUser$(): Observable<UserData | null> {
-    return this.authStateSubject.pipe(map(state => state.user));
+    return this.authStateSubject.pipe(map((state) => state.user));
   }
 
   get currentUser(): UserData | null {
@@ -230,7 +243,7 @@ export class AuthService {
   }
 
   get isAuthenticated$(): Observable<boolean> {
-    return this.authStateSubject.pipe(map(state => !!state.user));
+    return this.authStateSubject.pipe(map((state) => !!state.user));
   }
 
   get isAuthenticated(): boolean {
@@ -243,7 +256,9 @@ export class AuthService {
     }
 
     // Check if token is expired or about to expire (within 5 minutes)
-    const expiryTime = parseInt(localStorage.getItem(this.TOKEN_EXPIRY_KEY) || '0');
+    const expiryTime = parseInt(
+      localStorage.getItem(this.TOKEN_EXPIRY_KEY) || '0'
+    );
     const fiveMinutes = 5 * 60 * 1000;
     if (Date.now() + fiveMinutes >= expiryTime) {
       return this.refreshToken();
@@ -260,56 +275,103 @@ export class AuthService {
     }
 
     return from(currentUser.getIdToken(true)).pipe(
-      tap(async token => {
+      tap(async (token) => {
         if (token) {
           await this.updateAuthState(currentUser);
         }
       }),
-      map(token => token), // Ensure we return the token
-      catchError(error => {
+      map((token) => token), // Ensure we return the token
+      catchError((error) => {
         console.error('Error refreshing token:', error);
         this.clearAuthState();
         return throwError(() => new Error('Failed to refresh token'));
       })
     );
   }
-  
+
   signIn(email: string, password: string): Observable<UserData> {
+    console.log('Starting sign-in process for:', email);
     return from(signInWithEmailAndPassword(this.auth, email, password)).pipe(
       switchMap(async (userCredential) => {
-        await this.updateAuthState(userCredential.user);
-        await this.userService.saveUserData(this.mapUserToUserData(userCredential.user));
-        return this.mapUserToUserData(userCredential.user);
+        console.log('Sign-in successful for:', userCredential.user.uid);
+        try {
+          await this.updateAuthState(userCredential.user);
+          console.log('Auth state updated for signed-in user');
+
+          await this.userService.saveUserData(
+            this.mapUserToUserData(userCredential.user)
+          );
+          console.log('User data updated in database');
+
+          return this.mapUserToUserData(userCredential.user);
+        } catch (error) {
+          console.error('Error in post-sign-in process:', error);
+          throw error;
+        }
+      }),
+      catchError((error) => {
+        console.error('Sign-in error in auth service:', error);
+        return throwError(() => error);
       })
     );
   }
 
   signUp(email: string, password: string): Observable<UserData> {
-    return from(createUserWithEmailAndPassword(this.auth, email, password)).pipe(
+    console.log('Starting signup process for:', email);
+    return from(
+      createUserWithEmailAndPassword(this.auth, email, password)
+    ).pipe(
       switchMap(async (userCredential) => {
-        await this.updateAuthState(userCredential.user);
-        //await this.userService.saveUserData(this.mapUserToUserData(userCredential.user));
+        console.log('User created successfully:', userCredential.user.uid);
+        try {
+          await this.updateAuthState(userCredential.user);
+          console.log('Auth state updated for new user');
 
-         // Initialize user document with onboarding status
-        await this.userService.saveUserData({
-          ...this.mapUserToUserData(userCredential.user),
-          hasCompletedOnboarding: false
-        });
-        return this.mapUserToUserData(userCredential.user);
+          // Initialize user document with onboarding status
+          await this.userService.saveUserData({
+            ...this.mapUserToUserData(userCredential.user),
+            hasCompletedOnboarding: false,
+          });
+          console.log('User data saved to database');
+
+          return this.mapUserToUserData(userCredential.user);
+        } catch (error) {
+          console.error('Error in post-signup process:', error);
+          throw error;
+        }
+      }),
+      catchError((error) => {
+        console.error('Signup error in auth service:', error);
+        return throwError(() => error);
       })
     );
   }
 
   signInWithGoogle(): Observable<UserData> {
+    console.log('Starting Google sign-in process');
     const provider = new GoogleAuthProvider();
     return from(signInWithPopup(this.auth, provider)).pipe(
       switchMap(async (userCredential) => {
-        await this.updateAuthState(userCredential.user);
-        await this.userService.saveUserData({
-          ...this.mapUserToUserData(userCredential.user),
-          hasCompletedOnboarding: false
-        });
-        return this.mapUserToUserData(userCredential.user);
+        console.log('Google sign-in successful:', userCredential.user.uid);
+        try {
+          await this.updateAuthState(userCredential.user);
+          console.log('Auth state updated for Google user');
+
+          await this.userService.saveUserData({
+            ...this.mapUserToUserData(userCredential.user),
+            hasCompletedOnboarding: false,
+          });
+          console.log('Google user data saved to database');
+
+          return this.mapUserToUserData(userCredential.user);
+        } catch (error) {
+          console.error('Error in post-Google sign-in process:', error);
+          throw error;
+        }
+      }),
+      catchError((error) => {
+        console.error('Google sign-in error in auth service:', error);
+        return throwError(() => error);
       })
     );
   }
@@ -325,11 +387,13 @@ export class AuthService {
   }
 
   sendPasswordResetEmail(email: string): Observable<void> {
-    return from(sendPasswordResetEmail(this.auth, email, {
-      url: window.location.origin + '/login',
-      handleCodeInApp: true
-    })).pipe(
-      catchError(error => {
+    return from(
+      sendPasswordResetEmail(this.auth, email, {
+        url: window.location.origin + '/login',
+        handleCodeInApp: true,
+      })
+    ).pipe(
+      catchError((error) => {
         console.error('Error sending password reset email:', error);
         return throwError(() => this.getPasswordResetErrorMessage(error.code));
       })
@@ -338,7 +402,7 @@ export class AuthService {
 
   private getPasswordResetErrorMessage(errorCode: string): Error {
     let message = 'An error occurred while sending the password reset email';
-    
+
     switch (errorCode) {
       case 'auth/invalid-email':
         message = 'Invalid email address';
@@ -353,7 +417,7 @@ export class AuthService {
         message = 'Network error. Please check your connection';
         break;
     }
-    
+
     return new Error(message);
   }
 

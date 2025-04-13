@@ -1,7 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { AuthService } from './auth.service';
 
 @Component({
@@ -9,63 +15,89 @@ import { AuthService } from './auth.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-indigo-100 via-white to-cyan-100 flex items-center justify-center p-4">
-      <div class="max-w-md w-full space-y-8 bg-white rounded-2xl shadow-xl p-6 md:p-8">
+    <div
+      class="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 flex items-center justify-center p-4"
+    >
+      <div
+        class="max-w-md w-full space-y-8 bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8 border border-gray-700"
+      >
         <!-- Header -->
         <div class="text-center">
-          <h2 class="text-3xl font-bold text-gray-900 tracking-tight mb-2">
+          <h2 class="text-3xl font-bold text-white tracking-tight mb-2">
             Reset your password
           </h2>
-          <p class="text-sm text-gray-600">
-            Enter your email address and we'll send you instructions to reset your password.
+          <p class="text-sm text-gray-300">
+            Enter your email address and we'll send you instructions to reset
+            your password.
           </p>
         </div>
 
-        <form [formGroup]="resetForm" (ngSubmit)="onSubmit()" class="mt-8 space-y-6">
+        <form
+          [formGroup]="resetForm"
+          (ngSubmit)="onSubmit()"
+          class="mt-8 space-y-6"
+        >
           <!-- Success Message -->
-          <div *ngIf="isSuccess" 
-               class="bg-green-50 border-l-4 border-green-400 p-4 rounded-md"
-               role="alert">
+          <div
+            *ngIf="isSuccess"
+            class="bg-green-900/30 border-l-4 border-green-500 p-4 rounded-md"
+            role="alert"
+          >
             <div class="flex">
               <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" 
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" 
-                        clip-rule="evenodd" />
+                <svg
+                  class="h-5 w-5 text-green-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd"
+                  />
                 </svg>
               </div>
               <div class="ml-3">
-                <p class="text-sm text-green-700">
-                  Password reset email sent! Check your inbox for further instructions.
+                <p class="text-sm text-green-300">
+                  Password reset email sent! Check your inbox for further
+                  instructions.
                 </p>
               </div>
             </div>
           </div>
 
           <!-- Error Alert -->
-          <div *ngIf="error" 
-               class="bg-red-50 border-l-4 border-red-400 p-4 rounded-md"
-               role="alert">
-            <p class="text-sm text-red-700">{{error}}</p>
+          <div
+            *ngIf="error"
+            class="bg-red-900/30 border-l-4 border-red-500 p-4 rounded-md"
+            role="alert"
+          >
+            <p class="text-sm text-red-300">{{ error }}</p>
           </div>
 
           <!-- Email Field -->
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              for="email"
+              class="block text-sm font-medium text-gray-300 mb-1"
+            >
               Email address
             </label>
             <input
               id="email"
               type="email"
               formControlName="email"
-              class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-xl 
+              class="appearance-none block w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl 
                      shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 
-                     focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-              [class.border-red-300]="isFieldInvalid('email')"
+                     focus:ring-indigo-500 focus:border-indigo-500 transition-all text-white"
+              [class.border-red-500]="isFieldInvalid('email')"
               [class.ring-red-500]="isFieldInvalid('email')"
               placeholder="name@company.com"
             />
-            <p *ngIf="isFieldInvalid('email')" class="mt-2 text-sm text-red-600">
+            <p
+              *ngIf="isFieldInvalid('email')"
+              class="mt-2 text-sm text-red-400"
+            >
               Please enter a valid email address
             </p>
           </div>
@@ -81,11 +113,25 @@ import { AuthService } from './auth.service';
                    disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             <span *ngIf="isLoading" class="mr-2">
-              <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" 
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                </path>
+              <svg
+                class="animate-spin h-5 w-5"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
               </svg>
             </span>
             {{ isLoading ? 'Sending instructions...' : 'Reset password' }}
@@ -93,15 +139,17 @@ import { AuthService } from './auth.service';
 
           <!-- Back to Login -->
           <div class="text-center">
-            <a routerLink="/login" 
-               class="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors">
+            <a
+              routerLink="/login"
+              class="text-sm font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
+            >
               ← Back to login
             </a>
           </div>
         </form>
       </div>
     </div>
-  `
+  `,
 })
 export class ForgotPasswordComponent implements OnInit {
   resetForm: FormGroup;
@@ -116,7 +164,7 @@ export class ForgotPasswordComponent implements OnInit {
     private route: ActivatedRoute
   ) {
     this.resetForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]]
+      email: ['', [Validators.required, Validators.email]],
     });
   }
 
@@ -124,7 +172,7 @@ export class ForgotPasswordComponent implements OnInit {
     const email = this.route.snapshot.queryParams['email'];
     if (email) {
       this.resetForm.patchValue({
-        email: decodeURIComponent(email)
+        email: decodeURIComponent(email),
       });
     }
   }
@@ -142,10 +190,10 @@ export class ForgotPasswordComponent implements OnInit {
 
       try {
         const { email } = this.resetForm.value;
-        await this.authService.sendPasswordResetEmail(email).toPromise();
+        await firstValueFrom(this.authService.sendPasswordResetEmail(email));
         this.isSuccess = true;
         this.resetForm.reset();
-        
+
         // Redirect to login after 3 seconds
         setTimeout(() => {
           this.router.navigate(['/login']);
@@ -156,7 +204,7 @@ export class ForgotPasswordComponent implements OnInit {
         this.isLoading = false;
       }
     } else {
-      Object.keys(this.resetForm.controls).forEach(key => {
+      Object.keys(this.resetForm.controls).forEach((key) => {
         const control = this.resetForm.get(key);
         if (control?.invalid) {
           control.markAsTouched();
