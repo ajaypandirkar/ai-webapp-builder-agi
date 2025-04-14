@@ -1,146 +1,300 @@
 <!-- side-panel.component.html -->
-<div id="overlay" class="fixed inset-0 bg-black opacity-50 z-20" [class.hidden]="!isSidebarActive"
-    (click)="isSidebarActive = false"></div>
+<div
+  id="overlay"
+  class="fixed inset-0 bg-black opacity-50 z-20"
+  [class.hidden]="!isSidebarActive"
+  (click)="isSidebarActive = false"
+></div>
 
-<aside [style.width]="sidebarWidth"
-    class="fixed md:relative w-64 h-full bg-gray-800 text-white transform transition-transform duration-300 ease-in-out z-30 flex flex-col"
-    [class.w-16]="isPanelCollapsed" [class.-translate-x-full]="!isSidebarActive" [class.md:translate-x-0]="true">
+<aside
+  [style.width]="sidebarWidth"
+  class="fixed md:relative w-64 h-full bg-gray-800 text-white transform transition-transform duration-300 ease-in-out z-30 flex flex-col"
+  [class.w-16]="isPanelCollapsed"
+  [class.-translate-x-full]="!isSidebarActive"
+  [class.md:translate-x-0]="true"
+>
+  <!-- Header with Logo -->
+  <header class="p-4 border-b border-gray-700">
+    <!-- App Logo -->
+    <div class="flex items-center justify-between">
+      <a
+        routerLink="/"
+        class="logo-text"
+        [class.text-center]="isPanelCollapsed"
+      >
+        <span class="gradient-text">AI</span
+        ><span [class.hidden]="isPanelCollapsed"
+          >Website<span class="text-blue-400">Builder</span></span
+        >
+      </a>
+      <button
+        class="p-1 text-gray-400 hover:text-white rounded focus:outline-none transition-transform duration-300"
+        (click)="togglePanel()"
+      >
+        <i
+          class="bi"
+          [class.bi-chevron-left]="!isPanelCollapsed"
+          [class.bi-chevron-right]="isPanelCollapsed"
+        ></i>
+      </button>
+    </div>
+  </header>
 
-    <!-- Header with authentication status -->
-    <header class="flex justify-between items-center p-4 border-b border-gray-700">
-        <h3 class="text-sm font-semibold truncate transition-opacity duration-300" [class.opacity-0]="isPanelCollapsed">
-            {{ isAuthenticated ? 'Project Explorer' : 'Welcome' }}
-        </h3>
-        <button class="p-1 text-gray-400 hover:text-white rounded focus:outline-none transition-transform duration-300"
-            (click)="togglePanel()">
-            <i class="bi" [class.bi-chevron-left]="!isPanelCollapsed" [class.bi-chevron-right]="isPanelCollapsed"></i>
-        </button>
+  <!-- Main Navigation -->
+  <nav class="py-4 border-b border-gray-700">
+    <ul class="space-y-1 px-2">
+      <!-- Editor Link -->
+      <li>
+        <a
+          routerLink="/editor"
+          routerLinkActive="nav-active"
+          class="sidebar-nav-link"
+        >
+          <i class="bi bi-code-slash"></i>
+          <span
+            [class.opacity-0]="isPanelCollapsed"
+            [class.hidden]="isPanelCollapsed"
+            >Editor</span
+          >
+        </a>
+      </li>
+      <!-- Plans Link -->
+      <li>
+        <a
+          routerLink="/plans"
+          routerLinkActive="nav-active"
+          class="sidebar-nav-link"
+        >
+          <i class="bi bi-layers"></i>
+          <span
+            [class.opacity-0]="isPanelCollapsed"
+            [class.hidden]="isPanelCollapsed"
+            >Plans</span
+          >
+        </a>
+      </li>
+      <!-- Profile Link -->
+      <li>
+        <a
+          routerLink="/profile"
+          routerLinkActive="nav-active"
+          class="sidebar-nav-link"
+        >
+          <i class="bi bi-person"></i>
+          <span
+            [class.opacity-0]="isPanelCollapsed"
+            [class.hidden]="isPanelCollapsed"
+            >Profile</span
+          >
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- File Explorer Section (Only shown when authenticated) -->
+  <div *ngIf="isAuthenticated" class="flex-1 overflow-y-auto">
+    <!-- File Explorer Header -->
+    <header
+      class="flex justify-between items-center p-4 border-b border-gray-700"
+    >
+      <h3
+        class="text-sm font-semibold truncate transition-opacity duration-300"
+        [class.opacity-0]="isPanelCollapsed"
+      >
+        Project Explorer
+      </h3>
     </header>
 
-    <!-- Authentication Check Section -->
-    <div *ngIf="!isAuthenticated" class="flex-1 flex items-center justify-center p-4 text-center">
-        <div>
-            <p class="text-gray-400 mb-4">Please login to access your files</p>
-            <button routerLink="/login" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md">
-                Login
-            </button>
-        </div>
+    <!-- Root Level Actions -->
+    <div
+      class="flex justify-between items-center p-4"
+      *ngIf="!isPanelCollapsed"
+    >
+      <div class="space-x-2">
+        <button
+          class="text-xs px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded transition-colors duration-200"
+          (click)="startCreatingNode('folder', 'root')"
+        >
+          <i class="bi bi-folder-plus"></i>
+          <span class="ml-1">New Folder</span>
+        </button>
+        <button
+          class="text-xs px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded transition-colors duration-200"
+          (click)="startCreatingNode('file', 'root')"
+        >
+          <i class="bi bi-file-plus"></i>
+          <span class="ml-1">New File</span>
+        </button>
+      </div>
     </div>
 
-    <!-- File Explorer Section (Only shown when authenticated) -->
-    <div *ngIf="isAuthenticated" class="flex-1 overflow-y-auto">
-        <!-- Root Level Actions -->
-        <div class="flex justify-between items-center p-4" *ngIf="!isPanelCollapsed">
-            <div class="space-x-2">
-                <button class="text-xs px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded transition-colors duration-200"
-                    (click)="startCreatingNode('folder', 'root')">
-                    <i class="bi bi-folder-plus"></i>
-                    <span class="ml-1">New Folder</span>
-                </button>
-                <button class="text-xs px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded transition-colors duration-200"
-                    (click)="startCreatingNode('file', 'root')">
-                    <i class="bi bi-file-plus"></i>
-                    <span class="ml-1">New File</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- New Item Creation Form -->
-        <div *ngIf="isCreatingNew" class="mx-4 mb-4 p-2 bg-gray-700 rounded">
-            <input type="text" [(ngModel)]="newItemName" 
-                [placeholder]="'New ' + newItemType + ' name'"
-                class="w-full px-2 py-1 text-sm bg-gray-600 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
-                (keyup.enter)="createNode()"
-                (keyup.escape)="cancelCreatingNode()">
-            <div class="flex justify-end mt-2 space-x-2">
-                <button class="text-xs px-2 py-1 bg-gray-600 hover:bg-gray-500 rounded transition-colors duration-200"
-                    (click)="cancelCreatingNode()">Cancel</button>
-                <button class="text-xs px-2 py-1 bg-blue-600 hover:bg-blue-500 rounded transition-colors duration-200"
-                    (click)="createNode()">Create</button>
-            </div>
-        </div>
-
-        <!-- File Tree -->
-        <div class="px-2">
-            <ng-container *ngFor="let node of nodes$ | async">
-                <ng-container *ngTemplateOutlet="fileTreeNode; context: { $implicit: node, level: 0 }">
-                </ng-container>
-            </ng-container>
-        </div>
+    <!-- New Item Creation Form -->
+    <div *ngIf="isCreatingNew" class="mx-4 mb-4 p-2 bg-gray-700 rounded">
+      <input
+        type="text"
+        [(ngModel)]="newItemName"
+        [placeholder]="'New ' + newItemType + ' name'"
+        class="w-full px-2 py-1 text-sm bg-gray-600 rounded border border-gray-500 focus:outline-none focus:border-blue-500"
+        (keyup.enter)="createNode()"
+        (keyup.escape)="cancelCreatingNode()"
+      />
+      <div class="flex justify-end mt-2 space-x-2">
+        <button
+          class="text-xs px-2 py-1 bg-gray-600 hover:bg-gray-500 rounded transition-colors duration-200"
+          (click)="cancelCreatingNode()"
+        >
+          Cancel
+        </button>
+        <button
+          class="text-xs px-2 py-1 bg-blue-600 hover:bg-blue-500 rounded transition-colors duration-200"
+          (click)="createNode()"
+        >
+          Create
+        </button>
+      </div>
     </div>
 
-    <!-- File Tree Node Template -->
-    <ng-template #fileTreeNode let-node let-level="level">
-        <div class="flex items-center group" [style.paddingLeft]="level * 1.5 + 'rem'">
-            <!-- Folder/File Item -->
-            <div class="flex items-center py-1 px-2 rounded hover:bg-gray-700 w-full cursor-pointer transition-colors duration-200"
-                [class.bg-gray-700]="node.id === activeNodeId"
-                (click)="node.type === 'folder' ? toggleFolder(node.id) : selectNode(node)">
-                
-                <!-- Icon -->
-                <i class="bi mr-2"
-                    [class.bi-folder-fill]="node.type === 'folder' && !isFolderExpanded(node.id)"
-                    [class.bi-folder2-open]="node.type === 'folder' && isFolderExpanded(node.id)"
-                    [class.bi-file-earmark-text]="node.type === 'file' && node.name.endsWith('.html')"
-                    [class.bi-file-earmark-code]="node.type === 'file' && (node.name.endsWith('.css') || node.name.endsWith('.js'))"
-                    [class.bi-file-earmark]="node.type === 'file' && !node.name.endsWith('.html') && !node.name.endsWith('.css') && !node.name.endsWith('.js')">
-                </i>
+    <!-- File Tree -->
+    <div class="px-2">
+      <ng-container *ngFor="let node of nodes$ | async">
+        <ng-container
+          *ngTemplateOutlet="
+            fileTreeNode;
+            context: { $implicit: node, level: 0 }
+          "
+        >
+        </ng-container>
+      </ng-container>
+    </div>
+  </div>
 
-                <!-- Name -->
-                <span class="text-sm truncate" [class.opacity-0]="isPanelCollapsed">{{ node.name }}</span>
+  <!-- Authentication Notice if not authenticated -->
+  <div
+    *ngIf="!isAuthenticated"
+    class="flex-1 flex items-center justify-center p-4 text-center"
+  >
+    <div>
+      <p class="text-gray-400 mb-4">Please login to access your files</p>
+      <button
+        routerLink="/login"
+        class="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-md hover:from-blue-600 hover:to-purple-700"
+      >
+        Login
+      </button>
+    </div>
+  </div>
 
-                <!-- Actions -->
-                <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    *ngIf="!isPanelCollapsed">
-                    <button class="text-xs px-1 text-gray-400 hover:text-white transition-colors duration-200"
-                        *ngIf="node.type === 'folder'"
-                        (click)="$event.stopPropagation(); startCreatingNode('file', node.id)"
-                        title="New File">
-                        <i class="bi bi-file-plus"></i>
-                    </button>
-                    <button class="text-xs px-1 text-gray-400 hover:text-white transition-colors duration-200"
-                        *ngIf="node.type === 'folder'"
-                        (click)="$event.stopPropagation(); startCreatingNode('folder', node.id)"
-                        title="New Folder">
-                        <i class="bi bi-folder-plus"></i>
-                    </button>
-                    <button class="text-xs px-1 text-gray-400 hover:text-white transition-colors duration-200"
-                        (click)="$event.stopPropagation(); deleteNode(node.id)"
-                        title="Delete">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-            </div>
+  <!-- File Tree Node Template -->
+  <ng-template #fileTreeNode let-node let-level="level">
+    <div
+      class="flex items-center group"
+      [style.paddingLeft]="level * 1.5 + 'rem'"
+    >
+      <!-- Folder/File Item -->
+      <div
+        class="flex items-center py-1 px-2 rounded hover:bg-gray-700 w-full cursor-pointer transition-colors duration-200"
+        [class.bg-gray-700]="node.id === activeNodeId"
+        (click)="
+          node.type === 'folder' ? toggleFolder(node.id) : selectNode(node)
+        "
+      >
+        <!-- Icon -->
+        <i
+          class="bi mr-2"
+          [class.bi-folder-fill]="
+            node.type === 'folder' && !isFolderExpanded(node.id)
+          "
+          [class.bi-folder2-open]="
+            node.type === 'folder' && isFolderExpanded(node.id)
+          "
+          [class.bi-file-earmark-text]="
+            node.type === 'file' && node.name.endsWith('.html')
+          "
+          [class.bi-file-earmark-code]="
+            node.type === 'file' &&
+            (node.name.endsWith('.css') || node.name.endsWith('.js'))
+          "
+          [class.bi-file-earmark]="
+            node.type === 'file' &&
+            !node.name.endsWith('.html') &&
+            !node.name.endsWith('.css') &&
+            !node.name.endsWith('.js')
+          "
+        >
+        </i>
+
+        <!-- Name -->
+        <span class="text-sm truncate" [class.opacity-0]="isPanelCollapsed">{{
+          node.name
+        }}</span>
+
+        <!-- Actions -->
+        <div
+          class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+          *ngIf="!isPanelCollapsed"
+        >
+          <button
+            class="text-xs px-1 text-gray-400 hover:text-white transition-colors duration-200"
+            *ngIf="node.type === 'folder'"
+            (click)="
+              $event.stopPropagation(); startCreatingNode('file', node.id)
+            "
+            title="New File"
+          >
+            <i class="bi bi-file-plus"></i>
+          </button>
+          <button
+            class="text-xs px-1 text-gray-400 hover:text-white transition-colors duration-200"
+            *ngIf="node.type === 'folder'"
+            (click)="
+              $event.stopPropagation(); startCreatingNode('folder', node.id)
+            "
+            title="New Folder"
+          >
+            <i class="bi bi-folder-plus"></i>
+          </button>
+          <button
+            class="text-xs px-1 text-gray-400 hover:text-white transition-colors duration-200"
+            (click)="$event.stopPropagation(); deleteNode(node.id)"
+            title="Delete"
+          >
+            <i class="bi bi-trash"></i>
+          </button>
         </div>
+      </div>
+    </div>
 
-        <!-- Recursive Children -->
-        <div *ngIf="node.type === 'folder' && isFolderExpanded(node.id)" class="children-container">
-            <ng-container *ngFor="let childNode of getChildNodes(node.id)">
-                <ng-container *ngTemplateOutlet="fileTreeNode; context: { $implicit: childNode, level: level + 1 }">
-                </ng-container>
-            </ng-container>
-        </div>
-    </ng-template>
+    <!-- Recursive Children -->
+    <div
+      *ngIf="node.type === 'folder' && isFolderExpanded(node.id)"
+      class="children-container"
+    >
+      <ng-container *ngFor="let childNode of getChildNodes(node.id)">
+        <ng-container
+          *ngTemplateOutlet="
+            fileTreeNode;
+            context: { $implicit: childNode, level: level + 1 }
+          "
+        >
+        </ng-container>
+      </ng-container>
+    </div>
+  </ng-template>
 
-    <!-- Bottom Navigation -->
-    <nav class="p-4 border-t border-gray-700 mt-auto" *ngIf="isAuthenticated">
-        <ul class="space-y-2">
-            <li *ngFor="let item of [
-                { icon: 'bi-house-door', text: 'Dashboard', route: '/dashboard' },
-                { icon: 'bi-person', text: 'Profile', route: '/profile' },
-                { icon: 'bi-gear', text: 'Settings', route: '/settings' }
-            ]">
-                <a [routerLink]="item.route" 
-                   class="flex items-center gap-3 p-2 rounded hover:bg-gray-700 transition-colors duration-200"
-                   routerLinkActive="bg-gray-700">
-                    <i class="bi {{ item.icon }} text-lg"></i>
-                    <span class="transition-opacity duration-300" 
-                          [class.opacity-0]="isPanelCollapsed"
-                          [class.hidden]="isPanelCollapsed">
-                        {{ item.text }}
-                    </span>
-                </a>
-            </li>
-        </ul>
-    </nav>
+  <!-- Bottom Navigation / Logout Button -->
+  <nav class="p-4 border-t border-gray-700 mt-auto" *ngIf="isAuthenticated">
+    <button
+      (click)="logout()"
+      class="w-full flex items-center gap-3 p-2 rounded hover:bg-red-900/30 text-red-300 transition-colors duration-200"
+    >
+      <i class="bi bi-box-arrow-right text-lg"></i>
+      <span
+        class="transition-opacity duration-300"
+        [class.opacity-0]="isPanelCollapsed"
+        [class.hidden]="isPanelCollapsed"
+      >
+        Logout
+      </span>
+    </button>
+  </nav>
 </aside>

@@ -5,15 +5,16 @@ import { map } from 'rxjs/operators';
 import { FileNode } from '../contracts/file-system.types';
 import { FileSystemService } from '../../services/file-system.service';
 import { AuthService } from '../../auth/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-side-panel',
   templateUrl: './side-panel.component.html',
-  styleUrls: ['./side-panel.component.css']
+  styleUrls: ['./side-panel.component.css'],
 })
 export class SidePanelComponent implements OnInit {
   @Input() isSidebarActive: boolean = true;
-  
+
   isPanelCollapsed = false;
   sidebarWidth = '16rem';
   isAuthenticated = false;
@@ -31,12 +32,13 @@ export class SidePanelComponent implements OnInit {
 
   constructor(
     private fileSystemService: FileSystemService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {
     // Initialize nodes$ with authentication check
     this.nodes$ = combineLatest([
       this.authService.currentUser$,
-      this.fileSystemService.getState()
+      this.fileSystemService.getState(),
     ]).pipe(
       map(([user, state]) => {
         if (!user) return [];
@@ -44,7 +46,7 @@ export class SidePanelComponent implements OnInit {
       })
     );
   }
-  
+
   testInProgress = false;
   testError: string | null = null;
   testSuccess = false;
@@ -52,7 +54,7 @@ export class SidePanelComponent implements OnInit {
   ngOnInit() {
     // Subscribe to auth state
     this.subscriptions.push(
-      this.authService.currentUser$.subscribe(user => {
+      this.authService.currentUser$.subscribe((user) => {
         this.currentUser = user;
         this.isAuthenticated = !!user;
       })
@@ -61,6 +63,16 @@ export class SidePanelComponent implements OnInit {
     //await this.testOperations();
     this.handleResize();
     window.addEventListener('resize', () => this.handleResize());
+  }
+
+  // Logout method
+  async logout(): Promise<void> {
+    try {
+      await this.authService.signOut();
+      this.router.navigate(['/']);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   }
 
   // async testOperations() {
@@ -126,7 +138,7 @@ export class SidePanelComponent implements OnInit {
       const fileId = await this.fileSystemService.createNode({
         name: this.newItemName,
         type: this.newItemType,
-        parentId: this.newItemParentId
+        parentId: this.newItemParentId,
       });
 
       if (this.newItemParentId) {
@@ -180,7 +192,7 @@ export class SidePanelComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
     window.removeEventListener('resize', () => this.handleResize());
   }
 }

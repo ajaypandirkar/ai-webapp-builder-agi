@@ -6,7 +6,8 @@ import {
   QuotaStatus,
 } from '../../services/quota.service';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-profile',
@@ -56,18 +57,57 @@ export class ProfileComponent implements OnInit {
     try {
       // Get quota info first
       const quotaInfoResponse = await firstValueFrom(
-        this.quotaService.getQuotaInfo()
+        this.quotaService.getQuotaInfo().pipe(
+          catchError((err) => {
+            console.error('Error fetching quota info:', err);
+            return of({ quotaInfo: this.getDefaultQuotaInfo() });
+          })
+        )
       );
       this.quotaInfo = quotaInfoResponse.quotaInfo;
 
       // Then get quota status
       this.quotaStatus = await firstValueFrom(
-        this.quotaService.getQuotaStatus()
+        this.quotaService.getQuotaStatus().pipe(
+          catchError((err) => {
+            console.error('Error fetching quota status:', err);
+            return of(this.getDefaultQuotaStatus());
+          })
+        )
       );
     } catch (error) {
       console.error('Error loading quota data:', error);
       this.error = 'Failed to load quota information.';
+
+      // Set defaults
+      this.quotaInfo = this.getDefaultQuotaInfo();
+      this.quotaStatus = this.getDefaultQuotaStatus();
     }
+  }
+
+  private getDefaultQuotaInfo(): QuotaInfo {
+    return {
+      used: 0,
+      limit: 10,
+      isSubscribed: false,
+      subscriptionTier: 'free',
+      resetDate: new Date(
+        new Date().getTime() + 30 * 24 * 60 * 60 * 1000
+      ).toISOString(),
+      quotaResetPeriod: 'monthly',
+    };
+  }
+
+  private getDefaultQuotaStatus(): QuotaStatus {
+    return {
+      canGenerate: true,
+      remainingPosts: 10,
+      quotaPercentage: 0,
+      nextResetDate: new Date(
+        new Date().getTime() + 30 * 24 * 60 * 60 * 1000
+      ).toISOString(),
+      warningLevel: 'none',
+    };
   }
 
   getProgressBarColor(): string {

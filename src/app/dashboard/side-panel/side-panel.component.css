@@ -1,0 +1,38 @@
+.sidebar-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  color: #e5e7eb;
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-nav-link:hover {
+  background-color: rgba(55, 65, 81, 0.5);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.sidebar-nav-link i {
+  font-size: 1.1rem;
+}
+
+.nav-active {
+  color: white;
+  background-color: rgba(59, 130, 246, 0.15);
+  position: relative;
+}
+
+.nav-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, #60a5fa, #a78bfa);
+  border-radius: 0 2px 2px 0;
+}
