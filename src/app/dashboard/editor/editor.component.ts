@@ -5,13 +5,14 @@ import {
   ElementRef,
   AfterViewInit,
 } from '@angular/core';
-import { Subscription, take, tap, firstValueFrom } from 'rxjs';
+import { Subscription, take, tap, firstValueFrom, catchError } from 'rxjs';
 import { FileSystemService } from '../../services/file-system.service';
 import { Router } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { QuotaService, QuotaStatus } from '../../services/quota.service';
 
 @Component({
   selector: 'app-editor',
@@ -37,6 +38,11 @@ export class EditorComponent implements OnInit, AfterViewInit {
   isLoading = false;
   errorMessage: string | null = null;
 
+  // Quota states
+  quotaStatus: QuotaStatus | null = null;
+  isQuotaLoading = false;
+  quotaError: string | null = null;
+
   private subscriptions: Subscription[] = [];
   private resizeObserver: ResizeObserver;
 
@@ -52,7 +58,8 @@ export class EditorComponent implements OnInit, AfterViewInit {
     private fileSystemService: FileSystemService,
     private router: Router,
     private http: HttpClient,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private quotaService: QuotaService
   ) {
     this.resizeObserver = new ResizeObserver(() => {
       if (this.currentView !== 'desktop') {
@@ -88,6 +95,7 @@ export class EditorComponent implements OnInit, AfterViewInit {
           }
           this.setInitialView();
           this.setupResizeListener();
+          this.fetchQuotaStatus();
         })
       )
       .subscribe();
@@ -342,50 +350,87 @@ export class EditorComponent implements OnInit, AfterViewInit {
   }
 
   async generateDesign() {
-    if (!this.isAuthenticated) {
-      this.router.navigate(['/login'], {
-        queryParams: { returnUrl: this.router.url },
-      });
+    if (!this.prompt) {
+      this.errorMessage = 'Please enter a prompt for the design';
       return;
     }
 
-    if (!this.prompt.trim()) {
-      this.errorMessage = 'Please enter a prompt for the design generation';
-      return;
-    }
-
-    this.isLoading = true;
     this.errorMessage = null;
+    this.isLoading = true;
 
+    // First check quota status
     try {
-      console.log('Generating design for prompt:', this.prompt);
-      if (environment.production) {
-        this.generatedDesign = await this.callGenerationAPI(this.prompt);
-      } else {
-        this.generatedDesign = this.provideGeneratedDesignExample();
+      await this.fetchQuotaStatus(true);
+
+      if (this.quotaStatus && !this.quotaStatus.canGenerate) {
+        this.isLoading = false;
+        // Redirect to plans page when quota is exhausted
+        this.router.navigate(['/plans'], {
+          queryParams: {
+            reason: 'quota_exceeded',
+            returnUrl: this.router.url,
+          },
+        });
+        return;
       }
-      console.log('Design generated successfully');
 
-      // Render the design in the preview
-      setTimeout(() => {
-        this.renderDesign();
-      }, 100);
-    } catch (error) {
-      console.error('Design generation error:', error);
+      try {
+        const response = await this.callGenerationAPI(this.prompt);
+        this.generatedDesign = response;
 
-      // Provide more specific error messages based on error type
-      if (error instanceof Error) {
-        if (error.message.includes('Authentication')) {
-          this.errorMessage = 'Authentication error. Please sign in again.';
-        } else if (error.message.includes('Failed to generate')) {
-          this.errorMessage =
-            'The AI service failed to generate a design. Please try a different prompt.';
+        // Update quota after successful generation with the current design's ID
+        const postId = Math.random().toString(36).substring(2, 15);
+        this.quotaService
+          .incrementQuota(postId, 'design')
+          .pipe(
+            catchError((err) => {
+              console.error('Failed to update quota:', err);
+              return [];
+            })
+          )
+          .subscribe((result) => {
+            if (result && result.success) {
+              // Refresh quota status immediately after consumption
+              this.fetchQuotaStatus(true);
+
+              // If quota is now exhausted, show a notification
+              if (
+                result.newQuotaInfo &&
+                result.newQuotaInfo.remainingPosts === 0
+              ) {
+                this.errorMessage =
+                  'You have used all your available generations. Please upgrade your plan for more.';
+              }
+            }
+          });
+
+        // Render the design in the preview frame after a short delay
+        setTimeout(() => {
+          this.renderDesign();
+        }, 100);
+      } catch (error: any) {
+        console.error('Design generation error:', error);
+        if (
+          error.status === 403 &&
+          error.error &&
+          error.error.error === 'QuotaExceeded'
+        ) {
+          // Redirect to plans page
+          this.router.navigate(['/plans'], {
+            queryParams: {
+              reason: 'quota_exceeded',
+              returnUrl: this.router.url,
+            },
+          });
         } else {
-          this.errorMessage = error.message;
+          this.errorMessage =
+            'Failed to generate design. Please try again later.';
         }
-      } else {
-        this.errorMessage = 'Failed to generate design. Please try again.';
       }
+    } catch (error) {
+      console.error('Error checking quota:', error);
+      this.errorMessage =
+        'Could not verify your quota status. Please try again.';
     } finally {
       this.isLoading = false;
     }
@@ -458,7 +503,28 @@ export class EditorComponent implements OnInit, AfterViewInit {
     }
   }
 
-  provideGeneratedDesignExample(): string {
-    return '<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>AI Platform | Future of Intelligence</title>\n    <script src="https://cdn.tailwindcss.com"></script>\n    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">\n    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">\n    <style>\n        body {\n            font-family: \'Space Grotesk\', sans-serif;\n            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);\n        }\n        .gradient-text {\n            background: linear-gradient(90deg, #38bdf8, #818cf8);\n            -webkit-background-clip: text;\n            -webkit-text-fill-color: transparent;\n        }\n        .floating {\n            animation: float 6s ease-in-out infinite;\n        }\n        @keyframes float {\n            0% { transform: translateY(0px); }\n            50% { transform: translateY(-20px); }\n            100% { transform: translateY(0px); }\n        }\n        .glow {\n            box-shadow: 0 0 30px rgba(56, 189, 248, 0.3);\n        }\n    </style>\n</head>\n<body class="text-gray-100 min-h-screen">\n    <nav class="container mx-auto px-6 py-4">\n        <div class="flex justify-between items-center">\n            <div class="text-2xl font-bold gradient-text">AI.Platform</div>\n            <div class="hidden md:flex space-x-8">\n                <a href="#features" class="hover:text-blue-400 transition">Features</a>\n                <a href="#how-to" class="hover:text-blue-400 transition">How to Use</a>\n                <a href="#demo" class="hover:text-blue-400 transition">Demo</a>\n            </div>\n        </div>\n    </nav>\n\n    <main class="container mx-auto px-6">\n        <!-- Hero Section -->\n        <section class="py-20 text-center">\n            <div class="max-w-4xl mx-auto">\n                <h1 class="text-5xl md:text-7xl font-bold mb-8 gradient-text">\n                    The Future of AI is Here\n                </h1>\n                <p class="text-xl text-gray-300 mb-12">\n                    Transform your workflow with state-of-the-art artificial intelligence. \n                    Experience the power of next-generation machine learning.\n                </p>\n                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-8 rounded-full text-lg transition duration-300 transform hover:scale-105 glow">\n                    Get Started Now\n                </button>\n            </div>\n        </section>\n\n        <!-- Demo Video Section -->\n        <section id="demo" class="py-20">\n            <div class="max-w-4xl mx-auto bg-slate-800/50 rounded-2xl p-8 backdrop-blur-sm">\n                <h2 class="text-3xl font-bold mb-8 text-center gradient-text">See AI.Platform in Action</h2>\n                <div class="aspect-w-16 aspect-h-9 rounded-xl overflow-hidden shadow-2xl">\n                    <video class="w-full rounded-xl" controls poster="https://images.unsplash.com/photo-1673194112431-14530ce9b0e5?auto=format&fit=crop&q=80">\n                        <source src="#" type="video/mp4">\n                        Your browser does not support the video tag.\n                    </video>\n                </div>\n            </div>\n        </section>\n\n        <!-- How to Use Section -->\n        <section id="how-to" class="py-20">\n            <h2 class="text-3xl font-bold mb-16 text-center gradient-text">How to Use AI.Platform</h2>\n            <div class="grid md:grid-cols-3 gap-12">\n                <div class="bg-slate-800/30 p-8 rounded-2xl backdrop-blur-sm floating">\n                    <div class="text-5xl mb-4 text-blue-400"><i class="bi bi-1-circle"></i></div>\n                    <h3 class="text-xl font-bold mb-4">Sign Up</h3>\n                    <p class="text-gray-300">Create your account in seconds and get immediate access to our AI tools.</p>\n                </div>\n                <div class="bg-slate-800/30 p-8 rounded-2xl backdrop-blur-sm floating" style="animation-delay: 0.2s">\n                    <div class="text-5xl mb-4 text-blue-400"><i class="bi bi-2-circle"></i></div>\n                    <h3 class="text-xl font-bold mb-4">Upload Your Data</h3>\n                    <p class="text-gray-300">Simply drag and drop your files or integrate with our API.</p>\n                </div>\n                <div class="bg-slate-800/30 p-8 rounded-2xl backdrop-blur-sm floating" style="animation-delay: 0.4s">\n                    <div class="text-5xl mb-4 text-blue-400"><i class="bi bi-3-circle"></i></div>\n                    <h3 class="text-xl font-bold mb-4">Get Results</h3>\n                    <p class="text-gray-300">Watch as our AI processes your data and delivers insights in real-time.</p>\n                </div>\n            </div>\n        </section>\n\n        <!-- Features Section -->\n        <section id="features" class="py-20">\n            <div class="max-w-4xl mx-auto text-center">\n                <h2 class="text-3xl font-bold mb-16 gradient-text">Advanced Features</h2>\n                <div class="grid md:grid-cols-2 gap-8">\n                    <div class="bg-slate-800/30 p-6 rounded-xl backdrop-blur-sm hover:bg-slate-800/50 transition">\n                        <i class="bi bi-cpu text-4xl text-blue-400"></i>\n                        <h3 class="text-xl font-bold my-4">Neural Processing</h3>\n                        <p class="text-gray-300">Advanced neural networks for complex computations</p>\n                    </div>\n                    <div class="bg-slate-800/30 p-6 rounded-xl backdrop-blur-sm hover:bg-slate-800/50 transition">\n                        <i class="bi bi-graph-up text-4xl text-blue-400"></i>\n                        <h3 class="text-xl font-bold my-4">Real-time Analytics</h3>\n                        <p class="text-gray-300">Instant insights and data visualization</p>\n                    </div>\n                    <div class="bg-slate-800/30 p-6 rounded-xl backdrop-blur-sm hover:bg-slate-800/50 transition">\n                        <i class="bi bi-shield-check text-4xl text-blue-400"></i>\n                        <h3 class="text-xl font-bold my-4">Secure Processing</h3>\n                        <p class="text-gray-300">Enterprise-grade security protocols</p>\n                    </div>\n                    <div class="bg-slate-800/30 p-6 rounded-xl backdrop-blur-sm hover:bg-slate-800/50 transition">\n                        <i class="bi bi-cloud-arrow-up text-4xl text-blue-400"></i>\n                        <h3 class="text-xl font-bold my-4">Cloud Integration</h3>\n                        <p class="text-gray-300">Seamless cloud storage and processing</p>\n                    </div>\n                </div>\n            </div>\n        </section>\n    </main>\n\n    <footer class="container mx-auto px-6 py-8 text-center text-gray-400">\n        <p>© 2023 AI.Platform. All rights reserved.</p>\n    </footer>\n</body>\n</html>';
+  fetchQuotaStatus(silent: boolean = false): Promise<QuotaStatus | null> {
+    if (!silent) {
+      this.isQuotaLoading = true;
+    }
+    this.quotaError = null;
+
+    // First call getQuotaInfo to ensure quota is initialized
+    return firstValueFrom(this.quotaService.getQuotaInfo())
+      .then(() => {
+        // Then get the quota status
+        return firstValueFrom(this.quotaService.getQuotaStatus());
+      })
+      .then((status) => {
+        this.quotaStatus = status;
+        this.isQuotaLoading = false;
+        return status;
+      })
+      .catch((err) => {
+        console.error('Failed to load quota information:', err);
+        this.quotaError = 'Failed to load quota information';
+        this.isQuotaLoading = false;
+        return null;
+      });
   }
 }

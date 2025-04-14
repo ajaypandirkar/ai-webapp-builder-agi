@@ -14,13 +14,15 @@
         <i class="bi bi-list text-2xl"></i>
       </button>
       <h2 class="text-lg font-semibold">Start Building</h2>
-      <button
-        (click)="saveProject()"
-        class="px-4 py-2 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-md shadow hover:from-green-600 hover:to-teal-700"
-        [disabled]="!generatedDesign"
-      >
-        <i class="bi bi-download mr-1"></i> Save Project
-      </button>
+      <div class="flex items-center space-x-4">
+        <button
+          (click)="saveProject()"
+          class="px-4 py-2 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-md shadow hover:from-green-600 hover:to-teal-700"
+          [disabled]="!generatedDesign"
+        >
+          <i class="bi bi-download mr-1"></i> Save Project
+        </button>
+      </div>
     </header>
 
     <!-- Main Body -->
@@ -29,7 +31,11 @@
       <section
         class="bg-gray-900 border border-gray-700 rounded-lg p-4 shadow-lg"
       >
-        <h3 class="text-white font-semibold mb-3">Enter Prompt</h3>
+        <div
+          class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-3"
+        >
+          <h3 class="text-white font-semibold">Enter Prompt</h3>
+        </div>
         <div class="flex flex-col md:flex-row gap-4">
           <input
             [(ngModel)]="prompt"
@@ -39,7 +45,7 @@
           />
           <button
             (click)="generateDesign()"
-            [disabled]="isLoading"
+            [disabled]="isLoading || (quotaStatus && !quotaStatus.canGenerate)"
             class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-sm font-medium rounded-md shadow hover:from-purple-600 hover:to-pink-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span *ngIf="!isLoading">

@@ -1,0 +1,172 @@
+<div class="min-h-screen bg-gray-900 text-white">
+  <div class="container mx-auto py-8 px-4">
+    <h1 class="text-3xl font-bold mb-8 text-center md:text-left">My Profile</h1>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex justify-center items-center py-10">
+      <div
+        class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"
+      ></div>
+    </div>
+
+    <!-- Error State -->
+    <div
+      *ngIf="error && !isLoading"
+      class="bg-red-900/30 border-l-4 border-red-500 p-4 mb-6"
+    >
+      <div class="flex items-start">
+        <i class="bi bi-exclamation-triangle-fill mr-2 mt-0.5 text-red-400"></i>
+        <span class="text-red-300">{{ error }}</span>
+      </div>
+    </div>
+
+    <!-- Profile Content -->
+    <div
+      *ngIf="user && !isLoading"
+      class="grid grid-cols-1 md:grid-cols-3 gap-8"
+    >
+      <!-- User Info Section -->
+      <div class="bg-gray-800 rounded-lg p-6 shadow-lg col-span-1">
+        <div class="flex flex-col items-center mb-6">
+          <div
+            class="w-24 h-24 rounded-full bg-gray-700 mb-4 flex items-center justify-center"
+          >
+            <span
+              *ngIf="!user.photoURL"
+              class="text-4xl font-bold text-blue-400"
+            >
+              {{
+                user.displayName
+                  ? user.displayName[0].toUpperCase()
+                  : user.email[0].toUpperCase()
+              }}
+            </span>
+            <img
+              *ngIf="user.photoURL"
+              [src]="user.photoURL"
+              alt="Profile photo"
+              class="w-full h-full rounded-full object-cover"
+            />
+          </div>
+          <h2 class="text-xl font-semibold">
+            {{ user.displayName || "User" }}
+          </h2>
+          <p class="text-gray-400 text-sm mt-1">{{ user.email }}</p>
+        </div>
+
+        <div class="border-t border-gray-700 pt-4">
+          <p class="text-gray-400 text-sm mb-2">
+            <i class="bi bi-calendar3 mr-2"></i>
+            Joined: {{ user.metadata?.creationTime | date : "mediumDate" }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Quota & Subscription Section -->
+      <div class="bg-gray-800 rounded-lg p-6 shadow-lg md:col-span-2">
+        <h3 class="text-xl font-semibold mb-6 flex items-center">
+          <i class="bi bi-speedometer2 mr-2 text-blue-400"></i>
+          Usage & Subscription
+        </h3>
+
+        <!-- Subscription Info -->
+        <div class="mb-6">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-gray-400">Current Plan</span>
+            <span
+              class="capitalize font-medium px-3 py-1 rounded-full text-sm"
+              [ngClass]="
+                quotaInfo?.subscriptionTier === 'free'
+                  ? 'bg-gray-700 text-gray-300'
+                  : 'bg-blue-900/40 text-blue-300'
+              "
+            >
+              {{ quotaInfo?.subscriptionTier || "Free" }}
+            </span>
+          </div>
+
+          <div *ngIf="quotaInfo?.subscriptionTier === 'free'" class="mt-4">
+            <button
+              (click)="navigateToPlans()"
+              class="w-full py-2 px-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-md hover:from-blue-600 hover:to-purple-700 transition-all duration-200 flex items-center justify-center"
+            >
+              <i class="bi bi-arrow-up-circle mr-2"></i>
+              Upgrade to Pro
+            </button>
+          </div>
+        </div>
+
+        <!-- Quota Usage -->
+        <div>
+          <h4 class="font-medium mb-4">Generation Quota</h4>
+
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-gray-400">Monthly Allowance</span>
+            <span>
+              <span class="font-semibold">{{ quotaInfo?.used || 0 }}</span> /
+              {{ quotaInfo?.limit || 0 }}
+            </span>
+          </div>
+
+          <div class="w-full bg-gray-700 rounded-full h-3 mb-4">
+            <div
+              class="h-3 rounded-full"
+              [ngClass]="getProgressBarColor()"
+              [style.width.%]="quotaStatus?.quotaPercentage || 0"
+            ></div>
+          </div>
+
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-400">
+              <i class="bi bi-clock mr-1"></i>
+              Reset: {{ quotaInfo?.resetDate | date : "mediumDate" }}
+            </span>
+            <span
+              [ngClass]="{
+                'text-green-400': quotaStatus && quotaStatus.remainingPosts > 3,
+                'text-yellow-400':
+                  quotaStatus &&
+                  quotaStatus.remainingPosts <= 3 &&
+                  quotaStatus.remainingPosts > 0,
+                'text-red-400': quotaStatus && quotaStatus.remainingPosts === 0
+              }"
+            >
+              {{ quotaStatus?.remainingPosts || 0 }} generations remaining
+            </span>
+          </div>
+
+          <!-- Quota Warning -->
+          <div
+            *ngIf="quotaStatus && quotaStatus.remainingPosts === 0"
+            class="mt-4 bg-red-900/30 border-l-4 border-red-500 p-3 text-sm"
+          >
+            <p>
+              You've reached your monthly generation limit. Upgrade your plan to
+              continue creating designs.
+            </p>
+            <button
+              (click)="navigateToPlans()"
+              class="mt-2 text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              View Plans <i class="bi bi-arrow-right ml-1"></i>
+            </button>
+          </div>
+
+          <div
+            *ngIf="
+              quotaStatus &&
+              quotaStatus.remainingPosts > 0 &&
+              quotaStatus.remainingPosts <= 3
+            "
+            class="mt-4 bg-yellow-900/30 border-l-4 border-yellow-500 p-3 text-sm"
+          >
+            <p>
+              You're running low on generations this month. Consider upgrading
+              your plan for more.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

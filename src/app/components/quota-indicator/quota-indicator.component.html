@@ -1,0 +1,84 @@
+<div class="quota-indicator">
+  <!-- Loading state -->
+  <div *ngIf="isLoading" class="flex items-center justify-center p-2">
+    <div
+      class="w-5 h-5 border-2 border-t-blue-500 rounded-full animate-spin"
+    ></div>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="error && !isLoading" class="text-red-400 text-xs p-2">
+    <i class="bi bi-exclamation-triangle-fill mr-1"></i> {{ error }}
+  </div>
+
+  <!-- Quota display -->
+  <div *ngIf="quotaStatus && !isLoading && !error" class="flex flex-col">
+    <!-- Simple version (when showDetails is false) -->
+    <div *ngIf="!showDetails" class="flex items-center space-x-2 p-2">
+      <div class="relative w-6 h-6 flex items-center justify-center">
+        <svg class="w-6 h-6" viewBox="0 0 36 36">
+          <circle
+            cx="18"
+            cy="18"
+            r="16"
+            fill="none"
+            stroke="#4b5563"
+            stroke-width="2"
+          ></circle>
+          <circle
+            cx="18"
+            cy="18"
+            r="16"
+            fill="none"
+            [attr.stroke]="getProgressBarColor()"
+            stroke-width="3"
+            [attr.stroke-dasharray]="
+              quotaStatus.quotaPercentage * 100.53 + ' 100'
+            "
+            transform="rotate(-90 18 18)"
+          ></circle>
+        </svg>
+        <span class="absolute text-xs font-medium">
+          {{ quotaStatus.remainingPosts }}
+        </span>
+      </div>
+      <span *ngIf="quotaStatus.canGenerate" class="text-xs text-green-400"
+        >OK</span
+      >
+      <span *ngIf="!quotaStatus.canGenerate" class="text-xs text-red-400"
+        >Limit</span
+      >
+    </div>
+
+    <!-- Detailed version (default) -->
+    <div
+      *ngIf="showDetails"
+      class="p-3 border border-gray-700 rounded-lg bg-gray-800"
+    >
+      <div class="flex justify-between items-center mb-1">
+        <span class="text-sm text-gray-300">Generation Quota</span>
+        <span class="text-xs text-gray-400">
+          {{ quotaStatus.remainingPosts }} remaining
+        </span>
+      </div>
+
+      <div class="w-full bg-gray-700 rounded-full h-2.5 mb-1">
+        <div
+          class="h-2.5 rounded-full"
+          [ngClass]="getProgressBarColor()"
+          [style.width.%]="quotaStatus.quotaPercentage"
+        ></div>
+      </div>
+
+      <div class="flex justify-between items-center text-xs text-gray-400">
+        <span *ngIf="quotaStatus.canGenerate" class="text-green-400">
+          <i class="bi bi-check-circle-fill mr-1"></i> Available
+        </span>
+        <span *ngIf="!quotaStatus.canGenerate" class="text-red-400">
+          <i class="bi bi-x-circle-fill mr-1"></i> Quota exceeded
+        </span>
+        <span>Resets: {{ quotaStatus.nextResetDate | date : "MMM d" }}</span>
+      </div>
+    </div>
+  </div>
+</div>

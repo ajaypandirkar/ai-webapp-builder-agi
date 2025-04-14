@@ -4,16 +4,15 @@ import { EditorComponent } from './editor/editor.component';
 import { FormsModule } from '@angular/forms';
 import { DashboardRoutingModule } from './dashboard-routing.module';
 import { SidePanelComponent } from './side-panel/side-panel.component';
+import { ComponentsModule } from '../components/components.module';
 
 @NgModule({
-  declarations: [
-    EditorComponent,
-    SidePanelComponent
-  ],
+  declarations: [EditorComponent, SidePanelComponent],
   imports: [
     CommonModule,
     FormsModule,
-    DashboardRoutingModule
-  ]
+    DashboardRoutingModule,
+    ComponentsModule,
+  ],
 })
-export class DashboardModule { }
+export class DashboardModule {}
