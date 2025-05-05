@@ -4,6 +4,8 @@ import {
   ViewChild,
   ElementRef,
   AfterViewInit,
+  OnDestroy,
+  Inject,
 } from '@angular/core';
 import { Subscription, take, tap, firstValueFrom, catchError } from 'rxjs';
 import { FileSystemService } from '../../services/file-system.service';
@@ -13,13 +15,19 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { QuotaService, QuotaStatus } from '../../services/quota.service';
+import {
+  ProjectService,
+  Project,
+  Page,
+  CreateProjectDto,
+} from '../../services/project.service';
 
 @Component({
   selector: 'app-editor',
   templateUrl: './editor.component.html',
   styleUrl: './editor.component.css',
 })
-export class EditorComponent implements OnInit, AfterViewInit {
+export class EditorComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('previewFrame') previewFrame!: ElementRef;
 
   currentView: 'desktop' | 'tablet' | 'mobile' = 'desktop';
@@ -53,13 +61,17 @@ export class EditorComponent implements OnInit, AfterViewInit {
   isHtmlLoading = false;
   formattedHtml: SafeHtml | null = null;
 
+  private currentProjectId: string | null = null;
+  private currentPageId: string | null = null;
+
   constructor(
     private authService: AuthService,
     private fileSystemService: FileSystemService,
     private router: Router,
     private http: HttpClient,
     private sanitizer: DomSanitizer,
-    private quotaService: QuotaService
+    private quotaService: QuotaService,
+    private projectService: ProjectService
   ) {
     this.resizeObserver = new ResizeObserver(() => {
       if (this.currentView !== 'desktop') {
@@ -349,6 +361,74 @@ export class EditorComponent implements OnInit, AfterViewInit {
     this.renderDesign();
   }
 
+  private async ensureProjectAndPage(): Promise<void> {
+    try {
+      // Get user's projects
+      const projectsObservable = await this.projectService.getUserProjects();
+      const projects = await firstValueFrom(projectsObservable);
+
+      if (projects.length === 0) {
+        // Create a default project if none exists
+        const newProject: CreateProjectDto = {
+          name: 'My First Project',
+          description: 'Created automatically',
+        };
+
+        const createProjectObservable = await this.projectService.createProject(
+          newProject
+        );
+        const projectId = await firstValueFrom(createProjectObservable);
+        this.currentProjectId = projectId;
+      } else {
+        const firstProject = projects[0];
+        if (!firstProject.id) {
+          throw new Error('Project ID is missing');
+        }
+        this.currentProjectId = firstProject.id;
+      }
+
+      if (!this.currentProjectId) {
+        throw new Error('Failed to get or create project');
+      }
+
+      // Get the project to check for pages
+      const projectObservable = await this.projectService.getProject(
+        this.currentProjectId
+      );
+      const project = await firstValueFrom(projectObservable);
+
+      if (!project.pages || project.pages.length === 0) {
+        // Create a default page if none exists
+        const newPage: Omit<Page, 'id'> = {
+          projectId: this.currentProjectId,
+          name: 'Home',
+          path: '/',
+          content: '',
+        };
+
+        const createPageObservable = await this.projectService.createPage(
+          this.currentProjectId,
+          newPage
+        );
+        const pageId = await firstValueFrom(createPageObservable);
+        this.currentPageId = pageId;
+      } else {
+        const firstPage = project.pages[0];
+        if (!firstPage.id) {
+          throw new Error('Page ID is missing');
+        }
+        this.currentPageId = firstPage.id;
+      }
+
+      if (!this.currentPageId) {
+        throw new Error('Failed to get or create page');
+      }
+    } catch (error) {
+      console.error('Error in ensureProjectAndPage:', error);
+      throw error;
+    }
+  }
+
   async generateDesign() {
     if (!this.prompt) {
       this.errorMessage = 'Please enter a prompt for the design';
@@ -358,13 +438,15 @@ export class EditorComponent implements OnInit, AfterViewInit {
     this.errorMessage = null;
     this.isLoading = true;
 
-    // First check quota status
     try {
+      // First ensure we have a project and page
+      await this.ensureProjectAndPage();
+
+      // Check quota status
       await this.fetchQuotaStatus(true);
 
       if (this.quotaStatus && !this.quotaStatus.canGenerate) {
         this.isLoading = false;
-        // Redirect to plans page when quota is exhausted
         this.router.navigate(['/plans'], {
           queryParams: {
             reason: 'quota_exceeded',
@@ -374,26 +456,31 @@ export class EditorComponent implements OnInit, AfterViewInit {
         return;
       }
 
-      try {
-        const response = await this.callGenerationAPI(this.prompt);
-        this.generatedDesign = response;
+      // Generate the design
+      const response = await this.callGenerationAPI(this.prompt);
+      this.generatedDesign = response;
 
-        // Update quota after successful generation with the current design's ID
-        const postId = Math.random().toString(36).substring(2, 15);
-        this.quotaService
-          .incrementQuota(postId, 'design')
-          .pipe(
-            catchError((err) => {
-              console.error('Failed to update quota:', err);
-              return [];
-            })
-          )
-          .subscribe((result) => {
+      // Save the generated design to the current page
+      if (this.currentProjectId && this.currentPageId) {
+        const updatePageObservable = await this.projectService.updatePage(
+          this.currentProjectId,
+          this.currentPageId,
+          {
+            name: 'Home',
+            path: '/',
+            content: this.generatedDesign,
+            projectId: this.currentProjectId,
+          }
+        );
+        await firstValueFrom(updatePageObservable);
+
+        // Update quota
+        await firstValueFrom(
+          this.quotaService.incrementQuota(this.currentPageId, 'design')
+        )
+          .then((result) => {
             if (result && result.success) {
-              // Refresh quota status immediately after consumption
               this.fetchQuotaStatus(true);
-
-              // If quota is now exhausted, show a notification
               if (
                 result.newQuotaInfo &&
                 result.newQuotaInfo.remainingPosts === 0
@@ -402,38 +489,47 @@ export class EditorComponent implements OnInit, AfterViewInit {
                   'You have used all your available generations. Please upgrade your plan for more.';
               }
             }
-          });
+          })
+          .catch((err) => console.error('Failed to update quota:', err));
 
-        // Render the design in the preview frame after a short delay
+        // Render the design
         setTimeout(() => {
           this.renderDesign();
         }, 100);
-      } catch (error: any) {
-        console.error('Design generation error:', error);
-        if (
-          error.status === 403 &&
-          error.error &&
-          error.error.error === 'QuotaExceeded'
-        ) {
-          // Redirect to plans page
-          this.router.navigate(['/plans'], {
-            queryParams: {
-              reason: 'quota_exceeded',
-              returnUrl: this.router.url,
-            },
-          });
-        } else {
-          this.errorMessage =
-            'Failed to generate design. Please try again later.';
-        }
       }
-    } catch (error) {
-      console.error('Error checking quota:', error);
-      this.errorMessage =
-        'Could not verify your quota status. Please try again.';
+    } catch (error: any) {
+      console.error('Design generation error:', error);
+      if (error.status === 403 && error.error?.error === 'QuotaExceeded') {
+        this.router.navigate(['/plans'], {
+          queryParams: {
+            reason: 'quota_exceeded',
+            returnUrl: this.router.url,
+          },
+        });
+      } else {
+        this.errorMessage =
+          'Failed to generate design. Please try again later.';
+      }
     } finally {
       this.isLoading = false;
     }
+  }
+
+  private extractHtmlContent(text: string): string {
+    // Find the first occurrence of <!DOCTYPE html>
+    const doctypeIndex = text.indexOf('<!DOCTYPE html>');
+    if (doctypeIndex === -1) {
+      return text; // Return original text if no doctype found
+    }
+
+    // Find the last occurrence of </html>
+    const htmlEndIndex = text.lastIndexOf('</html>');
+    if (htmlEndIndex === -1) {
+      return text; // Return original text if no closing html tag found
+    }
+
+    // Extract the content between doctype and closing html tag
+    return text.substring(doctypeIndex, htmlEndIndex + 7); // +7 to include </html>
   }
 
   private async callGenerationAPI(prompt: string): Promise<string> {
@@ -469,10 +565,10 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
       console.log('Received API response:', response);
 
-      // Extract the HTML content from the completion field
+      // Extract the HTML content from the completion field and clean it
       if (response?.completion) {
         console.log('HTML content extracted successfully');
-        return response.completion;
+        return this.extractHtmlContent(response.completion);
       } else {
         console.error('API response missing completion field:', response);
         throw new Error('Failed to generate design');

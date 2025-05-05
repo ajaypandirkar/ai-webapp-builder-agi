@@ -1,0 +1,149 @@
+<div class="project-explorer h-full flex flex-col bg-gray-800 text-white">
+  <!-- Projects Header -->
+  <div class="flex items-center justify-between p-4 border-b border-gray-700">
+    <h2 class="text-lg font-semibold">Projects</h2>
+    <button
+      (click)="startCreatingProject()"
+      class="p-2 text-gray-400 hover:text-white transition-colors"
+      *ngIf="!isCreatingProject"
+    >
+      <i class="fas fa-plus"></i>
+    </button>
+  </div>
+
+  <!-- New Project Form -->
+  <div *ngIf="isCreatingProject" class="p-4 border-b border-gray-700">
+    <form [formGroup]="projectForm" (ngSubmit)="createProject()">
+      <div class="space-y-3">
+        <div>
+          <input
+            type="text"
+            formControlName="name"
+            placeholder="Project name"
+            class="w-full px-3 py-2 bg-gray-700 rounded border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <input
+            type="text"
+            formControlName="description"
+            placeholder="Description (optional)"
+            class="w-full px-3 py-2 bg-gray-700 rounded border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+        <div class="flex justify-end space-x-2">
+          <button
+            type="button"
+            (click)="cancelCreatingProject()"
+            class="px-3 py-1 text-sm text-gray-400 hover:text-white"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            [disabled]="!projectForm.valid"
+            class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+          >
+            Create
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Projects List -->
+  <div class="flex-1 overflow-y-auto">
+    <div *ngFor="let project of projects" class="border-b border-gray-700">
+      <!-- Project Header -->
+      <div
+        (click)="selectProject(project)"
+        class="flex items-center justify-between p-3 hover:bg-gray-700 cursor-pointer"
+        [class.bg-gray-700]="selectedProject?.id === project.id"
+      >
+        <div class="flex items-center space-x-2">
+          <i class="fas fa-folder text-yellow-500"></i>
+          <span>{{ project.name }}</span>
+        </div>
+        <button
+          (click)="deleteProject(project, $event)"
+          class="p-1 text-gray-400 hover:text-red-500 transition-colors"
+        >
+          <i class="fas fa-trash-alt"></i>
+        </button>
+      </div>
+
+      <!-- Project Pages -->
+      <div *ngIf="selectedProject?.id === project.id" class="pl-6">
+        <!-- New Page Button -->
+        <div *ngIf="!isCreatingPage" class="p-2">
+          <button
+            (click)="startCreatingPage()"
+            class="flex items-center space-x-2 text-sm text-gray-400 hover:text-white transition-colors"
+          >
+            <i class="fas fa-plus"></i>
+            <span>Add Page</span>
+          </button>
+        </div>
+
+        <!-- New Page Form -->
+        <div *ngIf="isCreatingPage" class="p-3">
+          <form [formGroup]="pageForm" (ngSubmit)="createPage()">
+            <div class="space-y-3">
+              <div>
+                <input
+                  type="text"
+                  formControlName="name"
+                  placeholder="Page name"
+                  class="w-full px-3 py-2 bg-gray-700 rounded border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  formControlName="path"
+                  placeholder="Path (e.g., /about)"
+                  class="w-full px-3 py-2 bg-gray-700 rounded border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              <div class="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  (click)="cancelCreatingPage()"
+                  class="px-3 py-1 text-sm text-gray-400 hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  [disabled]="!pageForm.valid"
+                  class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                >
+                  Create
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Pages List -->
+        <div *ngFor="let page of project.pages" class="group">
+          <div
+            (click)="selectPage(page)"
+            class="flex items-center justify-between p-2 hover:bg-gray-700 cursor-pointer"
+          >
+            <div class="flex items-center space-x-2">
+              <i class="fas fa-file-code text-blue-500"></i>
+              <span class="text-sm">{{ page.name }}</span>
+            </div>
+            <button
+              (click)="deletePage(page, $event)"
+              class="p-1 text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+            >
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
